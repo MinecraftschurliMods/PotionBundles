@@ -1,0 +1,11 @@
+modLoader="javafml"
+loaderVersion="[28,)"
+[[mods]]
+modId="potionbundles"
+version="${file.jarVersion}"
+displayName="PotionBundles"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/potion-bundles"
+authors="IchHabeHunger54, Minecraftschurli"
+description='''
+Adds "potion bundles", a type of stackable potions inspired by Ars Magica: Legacy.
+'''
