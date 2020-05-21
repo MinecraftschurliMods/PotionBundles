@@ -29,5 +29,5 @@ public class PotionBundles {
     }
 
     public static final DeferredRegister<Item> ITEMS = new DeferredRegister<>(ForgeRegistries.ITEMS, "potionbundles");
-    public static final RegistryObject<Item> POTION_BUNDLE = ITEMS.register("potion_bundle", () -> new PotionBundle(new Item.Properties().group(ItemGroup.BREWING)));
+    public static final RegistryObject<Item> POTION_BUNDLE = ITEMS.register("potion_bundle", () -> new PotionBundle(new Item.Properties().group(ItemGroup.BREWING).maxStackSize(1)));
 }
