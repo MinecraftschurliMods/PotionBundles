@@ -12,11 +12,11 @@ public class JEICompat implements IModPlugin {
     @Nonnull
     @Override
     public ResourceLocation getPluginUid() {
-        return new ResourceLocation("potionbundles", "potionbundles");
+        return new ResourceLocation(PotionBundles.MODID, PotionBundles.MODID);
     }
 
     @Override
     public void registerItemSubtypes(ISubtypeRegistration r) {
-        r.registerSubtypeInterpreter(PotionBundles.POTION_BUNDLE.get(), stack -> PotionUtils.getPotionFromItem(stack).getRegistryName().toString());
+        r.registerSubtypeInterpreter(PotionBundles.POTION_BUNDLE.get(), stack -> String.valueOf(PotionUtils.getPotion(stack).getRegistryName()));
     }
 }

@@ -3,19 +3,19 @@
   "overrides": [
     {
       "predicate": {
-        "uses": 1
+        "potionbundles:uses": 1
       },
       "model": "potionbundles:item/potion_bundle_1"
     },
     {
       "predicate": {
-        "uses": 2
+        "potionbundles:uses": 2
       },
       "model": "potionbundles:item/potion_bundle_2"
     },
     {
       "predicate": {
-        "uses": 3
+        "potionbundles:uses": 3
       },
       "model": "potionbundles:item/potion_bundle_3"
     }

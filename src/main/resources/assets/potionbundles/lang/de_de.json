@@ -1,3 +1,4 @@
 {
-  "item.potionbundles.potion_bundle": "%s-Bündel"
+  "item.potionbundles.potion_bundle": "%s-Bündel",
+  "item.potionbundles.potion_bundle.uses": "%s Portionen übrig"
 }
