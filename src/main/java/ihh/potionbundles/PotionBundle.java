@@ -1,8 +1,5 @@
 package ihh.potionbundles;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.LivingEntity;
@@ -19,7 +16,6 @@ import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -27,6 +23,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class PotionBundle extends PotionItem {
@@ -50,10 +48,8 @@ public class PotionBundle extends PotionItem {
 
     @Override
     public double getDurabilityForDisplay(ItemStack stack) {
-        if (Config.CLIENT.durabilityBarColor.get() == -1) {
-            return 1;
-        }
-        return stack.getOrCreateTag().getInt(USES_KEY) / 3d;
+        if (Config.CLIENT.durabilityBarColor.get() == -1) return 1;
+        return stack.getOrCreateTag().getInt(USES_KEY) / 3.0;
     }
 
     @Override
@@ -64,21 +60,15 @@ public class PotionBundle extends PotionItem {
     @Nonnull
     @Override
     public ItemStack finishUsingItem(@Nonnull ItemStack stack, @Nonnull World world, @Nonnull LivingEntity entity) {
-        if (!stack.hasTag() || !stack.getOrCreateTag().contains(USES_KEY) || PotionUtils.getPotion(stack) == Potions.EMPTY) {
+        if (!stack.hasTag() || !stack.getOrCreateTag().contains(USES_KEY) || PotionUtils.getPotion(stack) == Potions.EMPTY)
             return stack;
-        }
         PlayerEntity player = entity instanceof PlayerEntity ? (PlayerEntity) entity : null;
-        if (player instanceof ServerPlayerEntity) {
+        if (player instanceof ServerPlayerEntity)
             CriteriaTriggers.CONSUME_ITEM.trigger((ServerPlayerEntity) player, stack);
-        }
-        if (!world.isClientSide) {
-            for (EffectInstance effect : PotionUtils.getMobEffects(stack)) {
-                if (effect.getEffect().isInstantenous()) {
-                    effect.getEffect().applyInstantenousEffect(player, player, entity, effect.getAmplifier(), 1);
-                } else {
-                    entity.addEffect(new EffectInstance(effect));
-                }
-            }
+        if (!world.isClientSide) for (EffectInstance effect : PotionUtils.getMobEffects(stack)) {
+            if (effect.getEffect().isInstantenous())
+                effect.getEffect().applyInstantenousEffect(player, player, entity, effect.getAmplifier(), 1);
+            else entity.addEffect(new EffectInstance(effect));
         }
         CompoundNBT tag = stack.getOrCreateTag();
         if (player != null) {
@@ -86,27 +76,16 @@ public class PotionBundle extends PotionItem {
             tag.putInt(USES_KEY, tag.getInt(USES_KEY) - 1);
             ItemHandlerHelper.giveItemToPlayer(player, new ItemStack(Items.GLASS_BOTTLE));
         }
-        if (tag.getInt(USES_KEY) == 0) {
-            if (Config.SERVER.returnString.get()) {
-                return new ItemStack(Items.STRING);
-            } else {
-                return ItemStack.EMPTY;
-            }
-        }
-        return stack;
+        return tag.getInt(USES_KEY) == 0 ? Config.SERVER.returnString.get() ? new ItemStack(Items.STRING) : ItemStack.EMPTY : stack;
     }
 
     @Override
     public void fillItemCategory(@Nonnull ItemGroup group, @Nonnull NonNullList<ItemStack> items) {
-        if (this.allowdedIn(group)) {
-            for (Potion potion : ForgeRegistries.POTION_TYPES) {
-                if (potion == Potions.EMPTY) {
-                    continue;
-                }
-                ItemStack stack = PotionUtils.setPotion(new ItemStack(this), potion);
-                stack.getOrCreateTag().putInt(USES_KEY, 3);
-                items.add(stack);
-            }
+        if (this.allowdedIn(group)) for (Potion potion : ForgeRegistries.POTION_TYPES) {
+            if (potion == Potions.EMPTY) continue;
+            ItemStack stack = PotionUtils.setPotion(new ItemStack(this), potion);
+            stack.getOrCreateTag().putInt(USES_KEY, 3);
+            items.add(stack);
         }
     }
 }

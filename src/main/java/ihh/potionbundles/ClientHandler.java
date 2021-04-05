@@ -16,10 +16,9 @@ public class ClientHandler {
     }
 
     private static void registerItemModelOverrides() {
-        ItemModelsProperties.register(PotionBundles.POTION_BUNDLE.get(),
-                new ResourceLocation(PotionBundles.MODID, "uses"), (stack, world, living) -> {
-                    if (!stack.hasTag() || !stack.getOrCreateTag().contains(PotionBundle.USES_KEY)) return 0;
-                    return stack.getOrCreateTag().getInt(PotionBundle.USES_KEY);
-                });
+        ItemModelsProperties.register(PotionBundles.POTION_BUNDLE.get(), new ResourceLocation(PotionBundles.MODID, "uses"), (stack, world, living) -> {
+            if (!stack.hasTag() || !stack.getOrCreateTag().contains(PotionBundle.USES_KEY)) return 0;
+            return stack.getOrCreateTag().getInt(PotionBundle.USES_KEY);
+        });
     }
 }

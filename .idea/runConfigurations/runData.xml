@@ -3,7 +3,7 @@
   <configuration default="false" factoryName="Application" name="runData" singleton="false" type="Application">
     <option name="MAIN_CLASS_NAME" value="net.minecraftforge.userdev.LaunchTesting"/>
     <option name="VM_PARAMETERS" value="-Dforge.logging.console.level=debug"/>
-    <option name="PROGRAM_PARAMETERS" value="--mod potionbundles --all --output C:\Users\georg\Documents\moddev\PotionBundles\src\generated\resources --existing C:\Users\georg\Documents\moddev\PotionBundles\src\main\resources"/>
+    <option name="PROGRAM_PARAMETERS" value="--mod potionbundles --all --output D:\dev\PotionBundles\src\generated\resources --existing D:\dev\PotionBundles\src\main\resources"/>
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$\run"/>
     <module name="PotionBundles.main"/>
     <envs>
