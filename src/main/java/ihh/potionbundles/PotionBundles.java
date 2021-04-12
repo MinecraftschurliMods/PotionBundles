@@ -22,14 +22,9 @@ public class PotionBundles {
 
     public PotionBundles() {
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerItemColorHandler);
         FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(IRecipeSerializer.class, this::registerRecipeSerializers);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.clientSpec);
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.serverSpec);
-    }
-
-    private void registerItemColorHandler(ColorHandlerEvent.Item e) {
-        e.getItemColors().register((stack, index) -> index > 0 ? -1 : PotionUtils.getColor(stack), POTION_BUNDLE.get());
     }
 
     private void registerRecipeSerializers(RegistryEvent.Register<IRecipeSerializer<?>> e) {
