@@ -18,7 +18,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 public class PotionBundles {
     public static final String MODID = "potionbundles";
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
-    public static final RegistryObject<Item> POTION_BUNDLE = ITEMS.register("potion_bundle", () -> new PotionBundle(new Item.Properties().tab(ItemGroup.TAB_BREWING).stacksTo(1)));
+    public static final RegistryObject<Item> POTION_BUNDLE = ITEMS.register("potion_bundle", () -> new PotionBundle(new Item.Properties().group(ItemGroup.BREWING).maxStackSize(1)));
 
     public PotionBundles() {
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());

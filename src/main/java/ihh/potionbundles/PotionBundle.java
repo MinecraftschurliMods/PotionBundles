@@ -36,13 +36,13 @@ public class PotionBundle extends PotionItem {
 
     @Nonnull
     @Override
-    public ITextComponent getName(@Nonnull ItemStack stack) {
-        return new TranslationTextComponent("item.potionbundles.potion_bundle", new TranslationTextComponent(PotionUtils.getPotion(stack).getName(Util.makeDescriptionId("item", Items.POTION.getRegistryName()) + ".effect.")).getString());
+    public ITextComponent getDisplayName(@Nonnull ItemStack stack) {
+        return new TranslationTextComponent("item.potionbundles.potion_bundle", new TranslationTextComponent(PotionUtils.getPotionFromItem(stack).getNamePrefixed(Util.makeTranslationKey("item", Items.POTION.getRegistryName()) + ".effect.")).getString());
     }
 
     @Override
-    public void appendHoverText(@Nonnull ItemStack stack, @Nullable World world, @Nonnull List<ITextComponent> tooltip, @Nonnull ITooltipFlag flag) {
-        super.appendHoverText(stack, world, tooltip, flag);
+    public void addInformation(@Nonnull ItemStack stack, @Nullable World world, @Nonnull List<ITextComponent> tooltip, @Nonnull ITooltipFlag flag) {
+        super.addInformation(stack, world, tooltip, flag);
         tooltip.add(new TranslationTextComponent("item.potionbundles.potion_bundle.uses", stack.getOrCreateTag().getInt(USES_KEY)));
     }
 
@@ -59,20 +59,20 @@ public class PotionBundle extends PotionItem {
 
     @Nonnull
     @Override
-    public ItemStack finishUsingItem(@Nonnull ItemStack stack, @Nonnull World world, @Nonnull LivingEntity entity) {
-        if (!stack.hasTag() || !stack.getOrCreateTag().contains(USES_KEY) || PotionUtils.getPotion(stack) == Potions.EMPTY)
+    public ItemStack onItemUseFinish(@Nonnull ItemStack stack, @Nonnull World world, @Nonnull LivingEntity entity) {
+        if (!stack.hasTag() || !stack.getOrCreateTag().contains(USES_KEY) || PotionUtils.getPotionFromItem(stack) == Potions.EMPTY)
             return stack;
         PlayerEntity player = entity instanceof PlayerEntity ? (PlayerEntity) entity : null;
         if (player instanceof ServerPlayerEntity)
             CriteriaTriggers.CONSUME_ITEM.trigger((ServerPlayerEntity) player, stack);
-        if (!world.isClientSide) for (EffectInstance effect : PotionUtils.getMobEffects(stack)) {
-            if (effect.getEffect().isInstantenous())
-                effect.getEffect().applyInstantenousEffect(player, player, entity, effect.getAmplifier(), 1);
-            else entity.addEffect(new EffectInstance(effect));
+        if (!world.isRemote) for (EffectInstance effect : PotionUtils.getEffectsFromStack(stack)) {
+            if (effect.getPotion().isInstant())
+                effect.getPotion().affectEntity(player, player, entity, effect.getAmplifier(), 1);
+            else entity.addPotionEffect(new EffectInstance(effect));
         }
         CompoundNBT tag = stack.getOrCreateTag();
         if (player != null) {
-            player.awardStat(Stats.ITEM_USED.get(this));
+            player.addStat(Stats.ITEM_USED.get(this));
             tag.putInt(USES_KEY, tag.getInt(USES_KEY) - 1);
             ItemHandlerHelper.giveItemToPlayer(player, new ItemStack(Items.GLASS_BOTTLE));
         }
@@ -80,10 +80,10 @@ public class PotionBundle extends PotionItem {
     }
 
     @Override
-    public void fillItemCategory(@Nonnull ItemGroup group, @Nonnull NonNullList<ItemStack> items) {
-        if (this.allowdedIn(group)) for (Potion potion : ForgeRegistries.POTION_TYPES) {
+    public void fillItemGroup(@Nonnull ItemGroup group, @Nonnull NonNullList<ItemStack> items) {
+        if (this.isInGroup(group)) for (Potion potion : ForgeRegistries.POTION_TYPES) {
             if (potion == Potions.EMPTY) continue;
-            ItemStack stack = PotionUtils.setPotion(new ItemStack(this), potion);
+            ItemStack stack = PotionUtils.addPotionToItemStack(new ItemStack(this), potion);
             stack.getOrCreateTag().putInt(USES_KEY, 3);
             items.add(stack);
         }

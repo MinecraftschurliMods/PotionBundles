@@ -27,17 +27,17 @@ public class PotionBundleRecipe extends SpecialRecipe {
         int potions = 0;
         boolean string = false;
         Potion potion = Potions.EMPTY;
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            ItemStack is = inv.getItem(i);
+        for (int i = 0; i < inv.getSizeInventory(); i++) {
+            ItemStack is = inv.getStackInSlot(i);
             if (Tags.Items.STRING.contains(is.getItem())) {
                 if (string) return false;
                 string = true;
             } else if (is.getItem() == Items.POTION) {
                 if (potions == 0) {
-                    potion = PotionUtils.getPotion(is);
+                    potion = PotionUtils.getPotionFromItem(is);
                     potions++;
                 } else if (potions > 0) {
-                    if (PotionUtils.getPotion(is) != potion) return false;
+                    if (PotionUtils.getPotionFromItem(is) != potion) return false;
                     potions++;
                 }
                 if (potions > 3) return false;
@@ -48,20 +48,20 @@ public class PotionBundleRecipe extends SpecialRecipe {
 
     @Nonnull
     @Override
-    public ItemStack assemble(CraftingInventory inv) {
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            ItemStack is = inv.getItem(i);
+    public ItemStack getCraftingResult(CraftingInventory inv) {
+        for (int i = 0; i < inv.getSizeInventory(); i++) {
+            ItemStack is = inv.getStackInSlot(i);
             if (is.getItem() == Items.POTION) {
                 ItemStack stack = new ItemStack(PotionBundles.POTION_BUNDLE.get());
                 stack.getOrCreateTag().putInt(PotionBundle.USES_KEY, 3);
-                return PotionUtils.setPotion(stack, PotionUtils.getPotion(is));
+                return PotionUtils.addPotionToItemStack(stack, PotionUtils.getPotionFromItem(is));
             }
         }
-        return PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER);
+        return PotionUtils.addPotionToItemStack(new ItemStack(Items.POTION), Potions.WATER);
     }
 
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
+    public boolean canFit(int width, int height) {
         return width * height > 3;
     }
 
