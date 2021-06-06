@@ -1,7 +1,1 @@
-{
-  "parent": "item/generated",
-  "textures": {
-    "layer0": "potionbundles:item/potion_bundle_overlay_2",
-    "layer1": "potionbundles:item/potion_bundle_2"
-  }
-}
+{"parent":"item/generated","textures":{"layer0":"potionbundles:item/potion_bundle_overlay_2","layer1":"potionbundles:item/potion_bundle_2"}}
