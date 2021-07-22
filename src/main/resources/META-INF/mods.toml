@@ -12,13 +12,13 @@ Three potions can now be bound into bundles, to save inventory space.
 '''
 [[dependencies.${mod_id}]]
 modId="forge"
-versionRange="[36,)"
+versionRange="${forge_version_range}"
 mandatory=true
 ordering="NONE"
 side="BOTH"
 [[dependencies.${mod_id}]]
 modId="minecraft"
-versionRange="[1.16.5]"
+versionRange="${mc_version_range}"
 mandatory=true
 ordering="NONE"
 side="BOTH"
