@@ -3,13 +3,11 @@ loaderVersion = "${loader_version_range}"
 license="GPLv3"
 [[mods]]
 modId="${mod_id}"
-version="${version}"
+version="${mod_version}"
 displayName="${mod_name}"
 displayURL="${mod_url}"
-authors = "${mod_author}"
-description='''
-Three potions can now be bound into bundles, to save inventory space.
-'''
+authors = "${mod_authors}"
+description='''${mod_description}'''
 [[dependencies.${mod_id}]]
 modId="forge"
 versionRange="${forge_version_range}"

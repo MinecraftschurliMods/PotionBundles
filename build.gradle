@@ -61,16 +61,37 @@ dependencies {
     compileOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${project.jei_version}:api")
     runtimeOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${project.jei_version}")
 }
+def resource_targets = ["META-INF/mods.toml", "pack.mcmeta"]
+def into_targets = ["$rootDir/out/production/resources/", "$rootDir/out/production/${project.name}.main/", "$rootDir/bin/main/"]
+task replaceResources(type: Copy) {
+    outputs.upToDateWhen { false }
+    def spec = copySpec {
+        from(sourceSets.main.resources) {
+            include resource_targets
+            expand "project": project, "mod_id": mod_id, "mod_name": mod_name, "mod_version": mod_version, "mod_url": mod_url, "mod_authors": mod_authors, "mod_description": mod_description, "mc_version_range": mc_version_range, "forge_version_range": forge_version_range, "loader_version_range": loader_version_range
+        }
+    }
+    with spec
+    into "$buildDir/resources/main/"
+    into_targets.each { str ->
+        if (project.file(str).exists()) {
+            copy {
+                with spec
+                into str
+            }
+        }
+    }
+}
 jar {
     manifest {
         mainAttributes(
                 "Maven-Artifact": "${project.mod_group}:${project.archivesBaseName}:${project.version}",
                 "Specification-Title": archivesBaseName,
-                "Specification-Vendor": "${project.author}",
+                "Specification-Vendor": "${project.mod_authors}",
                 "Specification-Version": "1",
-                "Implementation-Title": "${archivesBaseName}${extension}",
+                "Implementation-Title": "${archivesBaseName}",
                 "Implementation-Version": "${project.mod_version}",
-                "Implementation-Vendor": "${project.author}",
+                "Implementation-Vendor": "${project.mod_authors}",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
                 "Built-On-Java": "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
                 "Built-On": "${project.mc_version}-${project.forge_version}"
