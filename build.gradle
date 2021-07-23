@@ -82,6 +82,7 @@ task replaceResources(type: Copy) {
         }
     }
 }
+processResources.finalizedBy replaceResources
 jar {
     manifest {
         mainAttributes(
