@@ -8,6 +8,9 @@ buildscript {
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
+//--------------
+apply plugin: 'idea'
+
 repositories {
     maven {
         name = "Progwml6 maven"
@@ -18,10 +21,12 @@ repositories {
         url = "https://modmaven.k-4u.nl"
     }
 }
+
 group = "${project.mod_group}"
 version = "${project.mc_version}-${project.mod_version}"
 archivesBaseName = "${project.mod_id}"
 java.toolchain.languageVersion = JavaLanguageVersion.of(project.java_version)
+
 minecraft {
     mappings channel: "${project.mappings_channel}", version: "${project.mappings_version}"
     runs {
@@ -46,7 +51,7 @@ minecraft {
         data {
             workingDirectory project.file('run')
             property 'forge.logging.console.level', 'debug'
-            args '--mod', 'potionbundles', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            args '--mod', "${project.mod_id}", '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
             mods {
                 potionbundles {
                     source sourceSets.main
@@ -55,34 +60,34 @@ minecraft {
         }
     }
 }
+
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+
 dependencies {
     minecraft "net.minecraftforge:forge:${project.mc_version}-${project.forge_version}"
     compileOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${project.jei_version}:api")
     runtimeOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${project.jei_version}")
 }
-def resource_targets = ["META-INF/mods.toml", "pack.mcmeta"]
-def into_targets = ["$rootDir/out/production/resources/", "$rootDir/out/production/${project.name}.main/", "$rootDir/bin/main/"]
-task replaceResources(type: Copy) {
-    outputs.upToDateWhen { false }
-    def spec = copySpec {
-        from(sourceSets.main.resources) {
-            include resource_targets
-            expand "project": project, "mod_id": mod_id, "mod_name": mod_name, "mod_version": mod_version, "mod_url": mod_url, "mod_authors": mod_authors, "mod_description": mod_description, "mc_version_range": mc_version_range, "forge_version_range": forge_version_range, "loader_version_range": loader_version_range
-        }
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        include 'META-INF/mods.toml'
+        expand 'mod_id': mod_id,
+                'mod_name': mod_name,
+                'mod_version': mod_version,
+                'mod_url': mod_url,
+                'mod_authors': mod_authors,
+                'mod_description': mod_description,
+                'mc_version_range': mc_version_range,
+                'forge_version_range': forge_version_range,
+                'loader_version_range': loader_version_range
     }
-    with spec
-    into "$buildDir/resources/main/"
-    into_targets.each { str ->
-        if (project.file(str).exists()) {
-            copy {
-                with spec
-                into str
-            }
-        }
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'META-INF/mods.toml'
     }
+    duplicatesStrategy DuplicatesStrategy.INCLUDE
 }
-processResources.finalizedBy replaceResources
+
 jar {
     manifest {
         mainAttributes(
