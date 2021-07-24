@@ -1,25 +1,21 @@
 package ihh.potionbundles;
 
+import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.PotionItem;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionUtils;
-import net.minecraft.potion.Potions;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.*;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -36,14 +32,14 @@ public class PotionBundle extends PotionItem {
 
     @Nonnull
     @Override
-    public ITextComponent getName(@Nonnull ItemStack stack) {
-        return new TranslationTextComponent("item.potionbundles.potion_bundle", new TranslationTextComponent(PotionUtils.getPotion(stack).getName(Util.makeDescriptionId("item", Items.POTION.getRegistryName()) + ".effect.")).getString());
+    public Component getName(@Nonnull ItemStack stack) {
+        return new TranslatableComponent("item.potionbundles.potion_bundle", new TranslatableComponent(PotionUtils.getPotion(stack).getName(Util.makeDescriptionId("item", Items.POTION.getRegistryName()) + ".effect.")).getString());
     }
 
     @Override
-    public void appendHoverText(@Nonnull ItemStack stack, @Nullable World world, @Nonnull List<ITextComponent> tooltip, @Nonnull ITooltipFlag flag) {
+    public void appendHoverText(final @Nonnull ItemStack stack, @Nullable final Level world, @Nonnull final List<Component> tooltip, @Nonnull final TooltipFlag flag) {
         super.appendHoverText(stack, world, tooltip, flag);
-        tooltip.add(new TranslationTextComponent("item.potionbundles.potion_bundle.uses", stack.getOrCreateTag().getInt(USES_KEY)));
+        tooltip.add(new TranslatableComponent("item.potionbundles.potion_bundle.uses", stack.getOrCreateTag().getInt(USES_KEY)));
     }
 
     @Override
@@ -59,18 +55,18 @@ public class PotionBundle extends PotionItem {
 
     @Nonnull
     @Override
-    public ItemStack finishUsingItem(@Nonnull ItemStack stack, @Nonnull World world, @Nonnull LivingEntity entity) {
+    public ItemStack finishUsingItem(@Nonnull ItemStack stack, @Nonnull Level world, @Nonnull LivingEntity entity) {
         if (!stack.hasTag() || !stack.getOrCreateTag().contains(USES_KEY) || PotionUtils.getPotion(stack) == Potions.EMPTY)
             return stack;
-        PlayerEntity player = entity instanceof PlayerEntity ? (PlayerEntity) entity : null;
-        if (player instanceof ServerPlayerEntity)
-            CriteriaTriggers.CONSUME_ITEM.trigger((ServerPlayerEntity) player, stack);
-        if (!world.isClientSide) for (EffectInstance effect : PotionUtils.getCustomEffects(stack)) {
+        Player player = entity instanceof Player ? (Player) entity : null;
+        if (player instanceof ServerPlayer)
+            CriteriaTriggers.CONSUME_ITEM.trigger((ServerPlayer) player, stack);
+        if (!world.isClientSide) for (MobEffectInstance effect : PotionUtils.getCustomEffects(stack)) {
             if (effect.getEffect().isInstantenous())
                 effect.getEffect().applyInstantenousEffect(player, player, entity, effect.getAmplifier(), 1);
-            else entity.addEffect(new EffectInstance(effect));
+            else entity.addEffect(new MobEffectInstance(effect));
         }
-        CompoundNBT tag = stack.getOrCreateTag();
+        CompoundTag tag = stack.getOrCreateTag();
         if (player != null) {
             player.awardStat(Stats.ITEM_USED.get(this));
             tag.putInt(USES_KEY, tag.getInt(USES_KEY) - 1);
@@ -80,7 +76,7 @@ public class PotionBundle extends PotionItem {
     }
 
     @Override
-    public void fillItemCategory(@Nonnull ItemGroup group, @Nonnull NonNullList<ItemStack> items) {
+    public void fillItemCategory(final @Nonnull CreativeModeTab group, final @Nonnull NonNullList<ItemStack> items) {
         if (this.allowdedIn(group)) for (Potion potion : ForgeRegistries.POTION_TYPES) {
             if (potion == Potions.EMPTY) continue;
             ItemStack stack = PotionUtils.setPotion(new ItemStack(this), potion);

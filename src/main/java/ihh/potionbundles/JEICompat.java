@@ -1,3 +1,4 @@
+/*
 package ihh.potionbundles;
 
 import mezz.jei.api.IModPlugin;
@@ -21,3 +22,4 @@ public class JEICompat implements IModPlugin {
         r.registerSubtypeInterpreter(PotionBundles.POTION_BUNDLE.get(), stack -> String.valueOf(PotionUtils.getPotion(stack).getRegistryName()));
     }
 }
+*/// JEI is not on 1.17 yet

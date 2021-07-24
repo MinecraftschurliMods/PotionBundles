@@ -1,29 +1,27 @@
 package ihh.potionbundles;
 
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.SpecialRecipe;
-import net.minecraft.item.crafting.SpecialRecipeSerializer;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionUtils;
-import net.minecraft.potion.Potions;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.Tags;
 
 import javax.annotation.Nonnull;
 
-public class PotionBundleRecipe extends SpecialRecipe {
-    public static final IRecipeSerializer<?> SERIALIZER = new SpecialRecipeSerializer<>(PotionBundleRecipe::new).setRegistryName("crafting_special_potion_bundle");
+public class PotionBundleRecipe extends CustomRecipe {
 
     public PotionBundleRecipe(ResourceLocation id) {
         super(id);
     }
 
     @Override
-    public boolean matches(CraftingInventory inv, @Nonnull World world) {
+    public boolean matches(final CraftingContainer inv, final @Nonnull Level world) {
         int potions = 0;
         boolean string = false;
         Potion potion = Potions.EMPTY;
@@ -48,7 +46,7 @@ public class PotionBundleRecipe extends SpecialRecipe {
 
     @Nonnull
     @Override
-    public ItemStack assemble(CraftingInventory inv) {
+    public ItemStack assemble(final CraftingContainer inv) {
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack is = inv.getItem(i);
             if (is.getItem() == Items.POTION) {
@@ -67,7 +65,7 @@ public class PotionBundleRecipe extends SpecialRecipe {
 
     @Nonnull
     @Override
-    public IRecipeSerializer<?> getSerializer() {
-        return SERIALIZER;
+    public RecipeSerializer<?> getSerializer() {
+        return PotionBundles.POTION_BUNDLE_RECIPE_SERIALIZER.get();
     }
 }
