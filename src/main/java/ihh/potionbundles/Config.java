@@ -44,11 +44,11 @@ public class Config {
                     .translation("config." + PotionBundles.MODID + ".returnString")
                     .define("returnString", true);
             allowSplashPotion = builder
-                    .comment("Whether to allow the creation of Potion Bundles from Splash Potions.")
+                    .comment("Allow the creation of Potion Bundles from Splash Potions.")
                     .translation("config." + PotionBundles.MODID + ".allowSplashPotion")
                     .define("allowSplashPotion", false);
             allowLingeringPotion = builder
-                    .comment("Whether to allow the creation of Potion Bundles from Lingering Potions.")
+                    .comment("Allow the creation of Potion Bundles from Lingering Potions.")
                     .translation("config." + PotionBundles.MODID + ".allowLingeringPotion")
                     .define("allowLingeringPotion", false);
         }

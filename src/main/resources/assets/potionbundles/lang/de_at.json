@@ -6,5 +6,7 @@
   "item.potionbundles.lingering_potion_bundle": "%s-Bündl",
   "item.potionbundles.lingering_potion_bundle.uses": "%s Tränke übrig",
   "config.potionbundles.durabilityBarColor": "Die Foab da Schadensleistn fürs Trankbündl. -1 schaltet die Schadensleistn aus.",
-  "config.potionbundles.returnString": "Ob der Fadn nachm Verwendn oller drei Flaschen zruckgebn werdn soll oder ned."
+  "config.potionbundles.returnString": "Ob der Fadn nachm Verwendn aller drei Flaschen zruckgebn werdn soll oder ned.",
+  "config.potionbundles.allowSplashPotion": "Schaltet Trankbündl aus Wurftränkn ein (braucht Neustart der Welt).",
+  "config.potionbundles.allowLingeringPotion": "Schaltet Trankbündl aus Verweiltränkn ein (braucht Neustart der Welt)."
 }

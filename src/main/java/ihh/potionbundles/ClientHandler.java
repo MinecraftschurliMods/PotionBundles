@@ -47,5 +47,13 @@ public class ClientHandler {
                 (stack, index) -> index > 0 ? -1 : PotionUtils.getColor(stack),
                 PotionBundles.POTION_BUNDLE.get()
         );
+        e.getItemColors().register(
+                (stack, index) -> index > 0 ? -1 : PotionUtils.getColor(stack),
+                PotionBundles.SPLASH_POTION_BUNDLE.get()
+        );
+        e.getItemColors().register(
+                (stack, index) -> index > 0 ? -1 : PotionUtils.getColor(stack),
+                PotionBundles.LINGERING_POTION_BUNDLE.get()
+        );
     }
 }
