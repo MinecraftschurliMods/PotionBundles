@@ -1,25 +1,29 @@
 package ihh.potionbundles;
 
+import com.google.gson.JsonObject;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.item.PotionItem;
 import net.minecraft.item.crafting.IRecipeSerializer;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.SpecialRecipe;
-import net.minecraft.item.crafting.SpecialRecipeSerializer;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraftforge.common.Tags;
+import net.minecraftforge.registries.ForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class PotionBundleRecipe extends SpecialRecipe {
-    public static final IRecipeSerializer<?> SERIALIZER = new SpecialRecipeSerializer<>(PotionBundleRecipe::new).setRegistryName("crafting_special_potion_bundle");
+    private final Ingredient string;
 
-    public PotionBundleRecipe(ResourceLocation id) {
+    public PotionBundleRecipe(ResourceLocation id, final Ingredient string) {
         super(id);
+        this.string = string;
     }
 
     @Override
@@ -29,35 +33,57 @@ public class PotionBundleRecipe extends SpecialRecipe {
         Potion potion = Potions.EMPTY;
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack is = inv.getItem(i);
-            if (Tags.Items.STRING.contains(is.getItem())) {
+            if (this.string.test(is)) {
                 if (string) return false;
                 string = true;
-            } else if (is.getItem() == Items.POTION) {
-                if (potions == 0) {
-                    potion = PotionUtils.getPotion(is);
-                    potions++;
-                } else if (potions > 0) {
-                    if (PotionUtils.getPotion(is) != potion) return false;
-                    potions++;
+            } else if (is.getItem() instanceof PotionItem) {
+                final AbstractPotionBundle bundle = PotionBundleUtils.getBundleForPotion((PotionItem) is.getItem());
+                if (bundle != null && bundle.isEnabled()) {
+                    if (potions == 0) {
+                        potion = PotionUtils.getPotion(is);
+                        potions++;
+                    } else if (potions > 0) {
+                        if (PotionUtils.getPotion(is) != potion) {
+                            return false;
+                        }
+                        potions++;
+                    }
+                    if (potions > PotionBundles.POTION_BUNDLE_SIZE) {
+                        return false;
+                    }
+                } else if (!is.isEmpty()) {
+                    return false;
                 }
-                if (potions > 3) return false;
-            } else if (!is.isEmpty()) return false;
+            } else if (!is.isEmpty()) {
+                return false;
+            }
         }
-        return potions == 3 && string;
+        return potions == PotionBundles.POTION_BUNDLE_SIZE && string;
     }
 
     @Nonnull
     @Override
-    public ItemStack assemble(CraftingInventory inv) {
+    public ItemStack assemble(final CraftingInventory inv) {
+        Potion potion = null;
+        AbstractPotionBundle bundleItem = null;
+        ItemStack string = null;
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack is = inv.getItem(i);
-            if (is.getItem() == Items.POTION) {
-                ItemStack stack = new ItemStack(PotionBundles.POTION_BUNDLE.get());
-                stack.getOrCreateTag().putInt(PotionBundle.USES_KEY, 3);
-                return PotionUtils.setPotion(stack, PotionUtils.getPotion(is));
+            if (potion == null && is.getItem() instanceof PotionItem) {
+                potion = PotionUtils.getPotion(is);
+                bundleItem = PotionBundleUtils.getBundleForPotion((PotionItem) is.getItem());
+                if (bundleItem == null || !bundleItem.isEnabled()) {
+                    return ItemStack.EMPTY;
+                }
+            }
+            if (string == null && this.string.test(is)) {
+                string = is;
+            }
+            if (potion != null && string != null) {
+                return bundleItem.createStack(string, potion);
             }
         }
-        return PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER);
+        return ItemStack.EMPTY;
     }
 
     @Override
@@ -68,6 +94,26 @@ public class PotionBundleRecipe extends SpecialRecipe {
     @Nonnull
     @Override
     public IRecipeSerializer<?> getSerializer() {
-        return SERIALIZER;
+        return PotionBundles.POTION_BUNDLE_RECIPE_SERIALIZER.get();
+    }
+
+    static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<PotionBundleRecipe> {
+
+        @Nonnull
+        @Override
+        public PotionBundleRecipe fromJson(final @Nonnull ResourceLocation rl, final @Nonnull JsonObject json) {
+            return new PotionBundleRecipe(rl, Ingredient.fromJson(json.get("string")));
+        }
+
+        @Nullable
+        @Override
+        public PotionBundleRecipe fromNetwork(final @Nonnull ResourceLocation rl, final @Nonnull PacketBuffer buf) {
+            return new PotionBundleRecipe(rl, Ingredient.fromNetwork(buf));
+        }
+
+        @Override
+        public void toNetwork(final @Nonnull PacketBuffer buf, final @Nonnull PotionBundleRecipe recipe) {
+            recipe.string.toNetwork(buf);
+        }
     }
 }

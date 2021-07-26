@@ -6,10 +6,12 @@ import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.potion.PotionUtils;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -17,17 +19,26 @@ import net.minecraftforge.registries.ForgeRegistries;
 @Mod(PotionBundles.MODID)
 public class PotionBundles {
     public static final String MODID = "potionbundles";
+    public static final int POTION_BUNDLE_SIZE = 3;
+
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
-    public static final RegistryObject<Item> POTION_BUNDLE = ITEMS.register("potion_bundle", () -> new PotionBundle(new Item.Properties().tab(ItemGroup.TAB_BREWING).stacksTo(1)));
+    public static final DeferredRegister<IRecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, MODID);
+
+    public static final RegistryObject<PotionBundle> POTION_BUNDLE = ITEMS.register("potion_bundle", PotionBundle::new);
+    public static final RegistryObject<SplashPotionBundle> SPLASH_POTION_BUNDLE = ITEMS.register("splash_potion_bundle", SplashPotionBundle::new);
+    public static final RegistryObject<LingeringPotionBundle> LINGERING_POTION_BUNDLE = ITEMS.register("lingering_potion_bundle", LingeringPotionBundle::new);
+    public static final RegistryObject<IRecipeSerializer<PotionBundleRecipe>> POTION_BUNDLE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("crafting_special_potion_bundle", PotionBundleRecipe.Serializer::new);
 
     public PotionBundles() {
-        ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
-        FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(IRecipeSerializer.class, this::registerRecipeSerializers);
+        final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        ITEMS.register(modEventBus);
+        RECIPE_SERIALIZERS.register(modEventBus);
+        modEventBus.addListener(this::setup);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.clientSpec);
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.serverSpec);
     }
 
-    private void registerRecipeSerializers(RegistryEvent.Register<IRecipeSerializer<?>> e) {
-        e.getRegistry().register(PotionBundleRecipe.SERIALIZER);
+    private void setup(final FMLCommonSetupEvent event) {
+        PotionBundleUtils.init();
     }
 }

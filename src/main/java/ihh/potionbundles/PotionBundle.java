@@ -27,65 +27,42 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class PotionBundle extends PotionItem {
-    public static final String USES_KEY = "Uses";
-
-    public PotionBundle(Properties properties) {
-        super(properties);
-    }
-
-    @Nonnull
-    @Override
-    public ITextComponent getName(@Nonnull ItemStack stack) {
-        return new TranslationTextComponent("item.potionbundles.potion_bundle", new TranslationTextComponent(PotionUtils.getPotion(stack).getName(Util.makeDescriptionId("item", Items.POTION.getRegistryName()) + ".effect.")).getString());
-    }
+public class PotionBundle extends AbstractPotionBundle {
 
     @Override
-    public void appendHoverText(@Nonnull ItemStack stack, @Nullable World world, @Nonnull List<ITextComponent> tooltip, @Nonnull ITooltipFlag flag) {
+    public void appendHoverText(@Nonnull final ItemStack stack, @Nullable final World world, @Nonnull final List<ITextComponent> tooltip, @Nonnull final ITooltipFlag flag) {
+        PotionUtils.addPotionTooltip(stack, tooltip, 1.0F);
         super.appendHoverText(stack, world, tooltip, flag);
-        tooltip.add(new TranslationTextComponent("item.potionbundles.potion_bundle.uses", stack.getOrCreateTag().getInt(USES_KEY)));
-    }
-
-    @Override
-    public double getDurabilityForDisplay(ItemStack stack) {
-        if (Config.CLIENT.durabilityBarColor.get() == -1) return 1;
-        return stack.getOrCreateTag().getInt(USES_KEY) / 3.0;
-    }
-
-    @Override
-    public int getRGBDurabilityForDisplay(ItemStack stack) {
-        return Config.CLIENT.durabilityBarColor.get();
     }
 
     @Nonnull
     @Override
     public ItemStack finishUsingItem(@Nonnull ItemStack stack, @Nonnull World world, @Nonnull LivingEntity entity) {
-        if (!stack.hasTag() || !stack.getOrCreateTag().contains(USES_KEY) || PotionUtils.getPotion(stack) == Potions.EMPTY)
-            return stack;
         PlayerEntity player = entity instanceof PlayerEntity ? (PlayerEntity) entity : null;
-        if (player instanceof ServerPlayerEntity)
+        if (player instanceof ServerPlayerEntity) {
             CriteriaTriggers.CONSUME_ITEM.trigger((ServerPlayerEntity) player, stack);
-        if (!world.isClientSide) for (EffectInstance effect : PotionUtils.getCustomEffects(stack)) {
-            if (effect.getEffect().isInstantenous())
-                effect.getEffect().applyInstantenousEffect(player, player, entity, effect.getAmplifier(), 1);
-            else entity.addEffect(new EffectInstance(effect));
         }
-        CompoundNBT tag = stack.getOrCreateTag();
+        if (!world.isClientSide) {
+            for (EffectInstance effect : PotionUtils.getMobEffects(stack)) {
+                if (effect.getEffect().isInstantenous())
+                    effect.getEffect().applyInstantenousEffect(player, player, entity, effect.getAmplifier(), 1);
+                else entity.addEffect(new EffectInstance(effect));
+            }
+        }
+        PotionBundleUtils.decrementUses(stack);
         if (player != null) {
             player.awardStat(Stats.ITEM_USED.get(this));
-            tag.putInt(USES_KEY, tag.getInt(USES_KEY) - 1);
             ItemHandlerHelper.giveItemToPlayer(player, new ItemStack(Items.GLASS_BOTTLE));
         }
-        return tag.getInt(USES_KEY) == 0 ? Config.SERVER.returnString.get() ? new ItemStack(Items.STRING) : ItemStack.EMPTY : stack;
+        return PotionBundleUtils.getUses(stack) == 0
+                ? Config.SERVER.returnString.get()
+                ? PotionBundleUtils.getString(stack)
+                : ItemStack.EMPTY
+                : stack;
     }
 
     @Override
-    public void fillItemCategory(@Nonnull ItemGroup group, @Nonnull NonNullList<ItemStack> items) {
-        if (this.allowdedIn(group)) for (Potion potion : ForgeRegistries.POTION_TYPES) {
-            if (potion == Potions.EMPTY) continue;
-            ItemStack stack = PotionUtils.setPotion(new ItemStack(this), potion);
-            stack.getOrCreateTag().putInt(USES_KEY, 3);
-            items.add(stack);
-        }
+    protected boolean isEnabled() {
+        return true;
     }
 }
