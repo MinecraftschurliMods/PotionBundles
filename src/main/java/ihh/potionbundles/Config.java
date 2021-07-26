@@ -33,20 +33,9 @@ public class Config {
         public final BooleanValue allowLingeringPotion;
 
         Server(ForgeConfigSpec.Builder builder) {
-            returnString = builder
-                    .comment("Whether to return the string upon finishing the bundle or not.")
-                    .translation("config." + PotionBundles.MODID + ".returnString")
-                    .define("returnString", true);
-            allowSplashPotion = builder
-                    .worldRestart()
-                    .comment("Whether to allow the creation of Potion Bundles from Splash Potions (requires world restart).")
-                    .translation("config." + PotionBundles.MODID + ".allowSplashPotion")
-                    .define("allowSplashPotion", false);
-            allowLingeringPotion = builder
-                    .worldRestart()
-                    .comment("Whether to allow the creation of Potion Bundles from Lingering Potions (requires world restart).")
-                    .translation("config." + PotionBundles.MODID + ".allowLingeringPotion")
-                    .define("allowLingeringPotion", false);
+            returnString = builder.comment("Whether to return the string upon finishing the bundle or not.").translation("config." + PotionBundles.MODID + ".returnString").define("returnString", true);
+            allowSplashPotion = builder.worldRestart().comment("Allow the creation of Potion Bundles from Splash Potions (requires world restart).").translation("config." + PotionBundles.MODID + ".allowSplashPotion").define("allowSplashPotion", false);
+            allowLingeringPotion = builder.worldRestart().comment("Allow the creation of Potion Bundles from Lingering Potions (requires world restart).").translation("config." + PotionBundles.MODID + ".allowLingeringPotion").define("allowLingeringPotion", false);
         }
     }
 }
