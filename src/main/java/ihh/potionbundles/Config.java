@@ -11,10 +11,12 @@ public class Config {
     static final Config.Server SERVER;
 
     static {
-        final Pair<Config.Client, ForgeConfigSpec> clientPair = new ForgeConfigSpec.Builder().configure(Config.Client::new);
+        final Pair<Config.Client, ForgeConfigSpec> clientPair = new ForgeConfigSpec.Builder()
+                .configure(Config.Client::new);
         clientSpec = clientPair.getRight();
         CLIENT = clientPair.getLeft();
-        final Pair<Config.Server, ForgeConfigSpec> serverPair = new ForgeConfigSpec.Builder().configure(Config.Server::new);
+        final Pair<Config.Server, ForgeConfigSpec> serverPair = new ForgeConfigSpec.Builder()
+                .configure(Config.Server::new);
         serverSpec = serverPair.getRight();
         SERVER = serverPair.getLeft();
     }
@@ -23,7 +25,11 @@ public class Config {
         public final ForgeConfigSpec.IntValue durabilityBarColor;
 
         Client(ForgeConfigSpec.Builder builder) {
-            durabilityBarColor = builder.comment("What color the damage bar of a potion bundle should have. Set to -1 to not display a damage bar.").translation("config." + PotionBundles.MODID + ".durabilityBarColor").defineInRange("durabilityBarColor", 0x0000dd, -1, 0xffffff);
+            durabilityBarColor = builder
+                    .comment("What color the damage bar of a potion bundle should have. " +
+                             "Set to -1 to not display a damage bar.")
+                    .translation("config." + PotionBundles.MODID + ".durabilityBarColor")
+                    .defineInRange("durabilityBarColor", 0x0000dd, -1, 0xffffff);
         }
     }
 
@@ -38,13 +44,11 @@ public class Config {
                     .translation("config." + PotionBundles.MODID + ".returnString")
                     .define("returnString", true);
             allowSplashPotion = builder
-                    .worldRestart()
-                    .comment("Whether to allow the creation of Potion Bundles from Splash Potions (requires world restart).")
+                    .comment("Whether to allow the creation of Potion Bundles from Splash Potions.")
                     .translation("config." + PotionBundles.MODID + ".allowSplashPotion")
                     .define("allowSplashPotion", false);
             allowLingeringPotion = builder
-                    .worldRestart()
-                    .comment("Whether to allow the creation of Potion Bundles from Lingering Potions (requires world restart).")
+                    .comment("Whether to allow the creation of Potion Bundles from Lingering Potions.")
                     .translation("config." + PotionBundles.MODID + ".allowLingeringPotion")
                     .define("allowLingeringPotion", false);
         }

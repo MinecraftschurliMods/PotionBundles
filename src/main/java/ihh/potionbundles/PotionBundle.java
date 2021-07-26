@@ -21,14 +21,19 @@ import java.util.List;
 public class PotionBundle extends AbstractPotionBundle {
 
     @Override
-    public void appendHoverText(@Nonnull final ItemStack stack, @Nullable final Level world, @Nonnull final List<Component> tooltip, @Nonnull final TooltipFlag flag) {
+    public void appendHoverText(final @Nonnull ItemStack stack,
+                                final @Nullable Level world,
+                                final @Nonnull List<Component> tooltip,
+                                final @Nonnull TooltipFlag flag) {
         PotionUtils.addPotionTooltip(stack, tooltip, 1.0F);
         super.appendHoverText(stack, world, tooltip, flag);
     }
 
     @Nonnull
     @Override
-    public ItemStack finishUsingItem(@Nonnull ItemStack stack, @Nonnull Level world, @Nonnull LivingEntity entity) {
+    public ItemStack finishUsingItem(final @Nonnull ItemStack stack,
+                                     final @Nonnull Level world,
+                                     final @Nonnull LivingEntity entity) {
         Player player = entity instanceof Player ? (Player) entity : null;
         if (player instanceof ServerPlayer) {
             CriteriaTriggers.CONSUME_ITEM.trigger((ServerPlayer) player, stack);
