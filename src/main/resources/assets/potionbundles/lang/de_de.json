@@ -4,5 +4,7 @@
   "item.potionbundles.splash_potion_bundle": "%s-Bündel",
   "item.potionbundles.splash_potion_bundle.uses": "%s Tränke übrig",
   "item.potionbundles.lingering_potion_bundle": "%s-Bündel",
-  "item.potionbundles.lingering_potion_bundle.uses": "%s Tränke übrig"
+  "item.potionbundles.lingering_potion_bundle.uses": "%s Tränke übrig",
+  "config.potionbundles.returnString": "Ob der Faden nach dem Trinken aller drei Flaschen zurückgegeben werden soll oder nicht.",
+  "config.potionbundles.durabilityBarColor": "Die Farbe der Schadensleiste für Trankbündel. -1 schaltet die Schadensleiste aus."
 }

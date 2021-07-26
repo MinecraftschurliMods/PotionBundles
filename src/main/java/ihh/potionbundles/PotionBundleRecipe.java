@@ -4,7 +4,8 @@ import com.google.gson.JsonObject;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
@@ -18,7 +19,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class PotionBundleRecipe extends CustomRecipe {
-
     private final Ingredient string;
 
     public PotionBundleRecipe(ResourceLocation id, final Ingredient string) {
@@ -36,16 +36,27 @@ public class PotionBundleRecipe extends CustomRecipe {
             if (this.string.test(is)) {
                 if (string) return false;
                 string = true;
-            } else if (isPotion(is.getItem())) {
-                if (potions == 0) {
-                    potion = PotionUtils.getPotion(is);
-                    potions++;
-                } else if (potions > 0) {
-                    if (PotionUtils.getPotion(is) != potion) return false;
-                    potions++;
+            } else if (is.getItem() instanceof PotionItem potionItem) {
+                final AbstractPotionBundle bundle = PotionBundleUtils.getBundleForPotion(potionItem);
+                if (bundle != null && bundle.isEnabled()) {
+                    if (potions == 0) {
+                        potion = PotionUtils.getPotion(is);
+                        potions++;
+                    } else if (potions > 0) {
+                        if (PotionUtils.getPotion(is) != potion) {
+                            return false;
+                        }
+                        potions++;
+                    }
+                    if (potions > PotionBundles.POTION_BUNDLE_SIZE) {
+                        return false;
+                    }
+                } else if (!is.isEmpty()) {
+                    return false;
                 }
-                if (potions > PotionBundles.POTION_BUNDLE_SIZE) return false;
-            } else if (!is.isEmpty()) return false;
+            } else if (!is.isEmpty()) {
+                return false;
+            }
         }
         return potions == PotionBundles.POTION_BUNDLE_SIZE && string;
     }
@@ -54,30 +65,25 @@ public class PotionBundleRecipe extends CustomRecipe {
     @Override
     public ItemStack assemble(final CraftingContainer inv) {
         Potion potion = null;
-        Item potionItem = null;
+        AbstractPotionBundle bundleItem = null;
         ItemStack string = null;
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack is = inv.getItem(i);
-            if (potion == null && isPotion(is.getItem())) {
+            if (potion == null && is.getItem() instanceof PotionItem potionItem) {
                 potion = PotionUtils.getPotion(is);
-                potionItem = is.getItem();
+                bundleItem = PotionBundleUtils.getBundleForPotion(potionItem);
+                if (bundleItem == null || !bundleItem.isEnabled()) {
+                    return ItemStack.EMPTY;
+                }
             }
             if (string == null && this.string.test(is)) {
                 string = is;
             }
             if (potion != null && string != null) {
-                if (potionItem == Items.POTION) {
-                    return PotionBundleUtils.createStack(string, potion);
-                } else {
-                    return PotionBundleUtils.createStack(string, potion, potionItem == Items.LINGERING_POTION);
-                }
+                return bundleItem.createStack(string, potion);
             }
         }
         return ItemStack.EMPTY;
-    }
-
-    private boolean isPotion(final Item item) {
-        return item == Items.POTION || (item == Items.SPLASH_POTION && Config.SERVER.allowSplashPotion.get()) || (item == Items.LINGERING_POTION && Config.SERVER.allowLingeringPotion.get());
     }
 
     @Override

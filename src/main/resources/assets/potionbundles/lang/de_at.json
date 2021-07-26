@@ -1,8 +1,10 @@
 {
-  "item.potionbundles.potion_bundle": "%s-Bünd'l",
+  "item.potionbundles.potion_bundle": "%s-Bündl",
   "item.potionbundles.potion_bundle.uses": "%s Tränke übrig",
-  "item.potionbundles.splash_potion_bundle": "%s-Bünd'l",
+  "item.potionbundles.splash_potion_bundle": "%s-Bündl",
   "item.potionbundles.splash_potion_bundle.uses": "%s Tränke übrig",
-  "item.potionbundles.lingering_potion_bundle": "%s-Bünd'l",
-  "item.potionbundles.lingering_potion_bundle.uses": "%s Tränke übrig"
+  "item.potionbundles.lingering_potion_bundle": "%s-Bündl",
+  "item.potionbundles.lingering_potion_bundle.uses": "%s Tränke übrig",
+  "config.potionbundles.durabilityBarColor": "Die Foab da Schadensleistn fürs Trankbündl. -1 schaltet die Schadensleistn aus.",
+  "config.potionbundles.returnString": "Ob der Fadn nachm Verwendn oller drei Flaschen zruckgebn werdn soll oder ned."
 }

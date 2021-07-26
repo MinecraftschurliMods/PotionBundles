@@ -1,9 +1,13 @@
 package ihh.potionbundles;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.PotionItem;
+import net.minecraftforge.registries.ForgeRegistries;
 
 /**
  * @author Minecraftschurli
@@ -11,39 +15,19 @@ import net.minecraft.world.item.alchemy.PotionUtils;
  */
 public final class PotionBundleUtils {
     public static final String USES_KEY = "Uses";
-    public static final String LINGERING_KEY = "Lingering";
     public static final String STRING_KEY = "String";
-    public static final String THROWABLE_KEY = "Throwable";
+    private static boolean init;
+    private static BiMap<ResourceLocation, ResourceLocation> REF_MAP;
 
     private PotionBundleUtils() {}
 
-    public static String getTranslationKey(final ItemStack stack) {
-        if (isThrowable(stack)) {
-            if (isLingering(stack)) {
-                return "item.potionbundles.lingering_potion_bundle";
-            } else {
-                return "item.potionbundles.splash_potion_bundle";
-            }
-        } else {
-            return "item.potionbundles.potion_bundle";
-        }
-    }
-
-    public static boolean isThrowable(final ItemStack stack) {
-        return stack.getOrCreateTag().getBoolean(THROWABLE_KEY);
-    }
-
-    public static void setThrowable(final ItemStack stack, boolean throwable) {
-        stack.getOrCreateTag().putBoolean(THROWABLE_KEY, throwable);
-    }
-
-    public static boolean isLingering(final ItemStack stack) {
-        return isThrowable(stack) && stack.getOrCreateTag().getBoolean(LINGERING_KEY);
-    }
-
-    public static void setLingering(final ItemStack stack, boolean lingering) {
-        if (isThrowable(stack)) return;
-        stack.getOrCreateTag().putBoolean(LINGERING_KEY, lingering);
+    static void init() {
+        if (init) return;
+        init = true;
+        REF_MAP = HashBiMap.create();
+        REF_MAP.put(Items.POTION.getRegistryName(), PotionBundles.POTION_BUNDLE.getId());
+        REF_MAP.put(Items.SPLASH_POTION.getRegistryName(), PotionBundles.SPLASH_POTION_BUNDLE.getId());
+        REF_MAP.put(Items.LINGERING_POTION.getRegistryName(), PotionBundles.LINGERING_POTION_BUNDLE.getId());
     }
 
     public static int getUses(final ItemStack stack) {
@@ -67,20 +51,13 @@ public final class PotionBundleUtils {
         stack.getOrCreateTag().put(STRING_KEY, string.serializeNBT());
     }
 
-    public static ItemStack createStack(ItemStack string, Potion potion, boolean lingering) {
-        ItemStack stack = PotionUtils.setPotion(new ItemStack(PotionBundles.POTION_BUNDLE.get()), potion);
-        setUses(stack, PotionBundles.POTION_BUNDLE_SIZE);
-        setString(stack, string);
-        setThrowable(stack, true);
-        setLingering(stack, lingering);
-        return stack;
+    public static AbstractPotionBundle getBundleForPotion(final PotionItem potion) {
+        Item i = ForgeRegistries.ITEMS.getValue(REF_MAP.get(ForgeRegistries.ITEMS.getKey(potion)));
+        return i instanceof AbstractPotionBundle potionBundle ? potionBundle : null;
     }
 
-    public static ItemStack createStack(ItemStack string, Potion potion) {
-        ItemStack stack = PotionUtils.setPotion(new ItemStack(PotionBundles.POTION_BUNDLE.get()), potion);
-        setUses(stack, PotionBundles.POTION_BUNDLE_SIZE);
-        setString(stack, string);
-        setThrowable(stack, false);
-        return stack;
+    public static PotionItem getPotionForBundle(final AbstractPotionBundle bundle) {
+        Item i = ForgeRegistries.ITEMS.getValue(REF_MAP.inverse().get(ForgeRegistries.ITEMS.getKey(bundle)));
+        return i instanceof PotionItem potionItem ? potionItem : null;
     }
 }
