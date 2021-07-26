@@ -23,7 +23,7 @@ public class Config {
         public final ForgeConfigSpec.IntValue durabilityBarColor;
 
         Client(ForgeConfigSpec.Builder builder) {
-            durabilityBarColor = builder.comment("What color the damage bar of a potion bundle should have. -1 means don't display a damage bar.").translation(PotionBundles.MODID + ".configgui.durabilityBarColor").defineInRange("durabilityBarColor", 0x0000dd, -1, 0xffffff);
+            durabilityBarColor = builder.comment("What color the damage bar of a potion bundle should have. Set to -1 to not display a damage bar.").translation("config." + PotionBundles.MODID + ".durabilityBarColor").defineInRange("durabilityBarColor", 0x0000dd, -1, 0xffffff);
         }
     }
 
@@ -31,7 +31,7 @@ public class Config {
         public final BooleanValue returnString;
 
         Server(ForgeConfigSpec.Builder builder) {
-            returnString = builder.comment("Whether to return the string on finishing the bundle or not.").translation(PotionBundles.MODID + ".configgui.returnString").define("returnString", true);
+            returnString = builder.comment("Whether to return the string upon finishing the bundle or not.").translation("config." + PotionBundles.MODID + ".returnString").define("returnString", true);
         }
     }
 }
