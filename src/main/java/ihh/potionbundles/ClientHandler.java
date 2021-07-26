@@ -13,19 +13,15 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 public class ClientHandler {
     @SubscribeEvent
     public static void clientSetup(final FMLClientSetupEvent e) {
-        e.enqueueWork(() -> {
-            ItemProperties.register(
-                    PotionBundles.POTION_BUNDLE.get(),
-                    new ResourceLocation(PotionBundles.MODID, "uses"),
-                    (stack, world, living, seed) -> (!stack.hasTag() || !stack.getOrCreateTag().contains(PotionBundleUtils.USES_KEY))
-                            ? 0
-                            : PotionBundleUtils.getUses(stack)
-            );
-        });
+        e.enqueueWork(() -> ItemProperties.register(PotionBundles.POTION_BUNDLE.get(), new ResourceLocation(PotionBundles.MODID, "uses"), (stack, world, living, seed) -> (!stack.hasTag() || !stack.getOrCreateTag().contains(PotionBundleUtils.USES_KEY)) ? 0 : PotionBundleUtils.getUses(stack)));
+        e.enqueueWork(() -> ItemProperties.register(PotionBundles.SPLASH_POTION_BUNDLE.get(), new ResourceLocation(PotionBundles.MODID, "uses"), (stack, world, living, seed) -> (!stack.hasTag() || !stack.getOrCreateTag().contains(PotionBundleUtils.USES_KEY)) ? 0 : PotionBundleUtils.getUses(stack)));
+        e.enqueueWork(() -> ItemProperties.register(PotionBundles.LINGERING_POTION_BUNDLE.get(), new ResourceLocation(PotionBundles.MODID, "uses"), (stack, world, living, seed) -> (!stack.hasTag() || !stack.getOrCreateTag().contains(PotionBundleUtils.USES_KEY)) ? 0 : PotionBundleUtils.getUses(stack)));
     }
 
     @SubscribeEvent
     public static void registerItemColorHandler(ColorHandlerEvent.Item e) {
         e.getItemColors().register((stack, index) -> index > 0 ? -1 : PotionUtils.getColor(stack), PotionBundles.POTION_BUNDLE.get());
+        e.getItemColors().register((stack, index) -> index > 0 ? -1 : PotionUtils.getColor(stack), PotionBundles.SPLASH_POTION_BUNDLE.get());
+        e.getItemColors().register((stack, index) -> index > 0 ? -1 : PotionUtils.getColor(stack), PotionBundles.LINGERING_POTION_BUNDLE.get());
     }
 }
