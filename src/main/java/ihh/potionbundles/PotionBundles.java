@@ -4,7 +4,6 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -20,7 +19,7 @@ public class PotionBundles {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, MODID);
     public static final RegistryObject<Item> POTION_BUNDLE = ITEMS.register("potion_bundle", () -> new PotionBundle(new Item.Properties().tab(CreativeModeTab.TAB_BREWING).stacksTo(1)));
-    public static final RegistryObject<RecipeSerializer<PotionBundleRecipe>> POTION_BUNDLE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("crafting_special_potion_bundle", () -> new SimpleRecipeSerializer<>(PotionBundleRecipe::new));
+    public static final RegistryObject<RecipeSerializer<PotionSubtypeRecipe>> POTION_SUBTYPE_RECIPE = RECIPE_SERIALIZERS.register("crafting_special_potion_subtype", PotionSubtypeRecipe.Serializer::new);
 
     public PotionBundles() {
         final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();

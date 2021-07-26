@@ -1,1 +1,1 @@
-{"type":"potionbundles:crafting_special_potion_bundle"}
+{"type":"potionbundles:crafting_special_potion_subtype","potion":{"item":"minecraft:potion"},"result":{"item":"potionbundles:potion_bundle"}}
