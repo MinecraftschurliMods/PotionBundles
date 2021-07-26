@@ -27,7 +27,7 @@ public abstract class AbstractPotionBundle extends PotionItem {
 
     @Override
     public void appendHoverText(final @Nonnull ItemStack stack, @Nullable final World world, @Nonnull final List<ITextComponent> tooltip, @Nonnull final ITooltipFlag flag) {
-        tooltip.add(new TranslationTextComponent(this.getDescriptionId(stack) + ".uses", PotionBundleUtils.getUses(stack)));
+        tooltip.add(new TranslationTextComponent(this.getDescriptionId() + ".uses", PotionBundleUtils.getUses(stack)));
     }
 
     @Override
@@ -44,7 +44,7 @@ public abstract class AbstractPotionBundle extends PotionItem {
     @Nonnull
     @Override
     public ITextComponent getName(@Nonnull ItemStack stack) {
-        return new TranslationTextComponent(this.getDescriptionId(stack), new TranslationTextComponent(PotionUtils.getPotion(stack).getName(Util.makeDescriptionId("item", Items.POTION.getRegistryName()) + ".effect.")).getString());
+        return new TranslationTextComponent(this.getDescriptionId(), new TranslationTextComponent(PotionUtils.getPotion(stack).getName(Util.makeDescriptionId("item", Items.POTION.getRegistryName()) + ".effect.")).getString());
     }
 
     @Override
