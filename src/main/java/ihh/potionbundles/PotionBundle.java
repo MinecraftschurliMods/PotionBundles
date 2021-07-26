@@ -5,23 +5,14 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.PotionItem;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtils;
-import net.minecraft.potion.Potions;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -30,14 +21,19 @@ import java.util.List;
 public class PotionBundle extends AbstractPotionBundle {
 
     @Override
-    public void appendHoverText(@Nonnull final ItemStack stack, @Nullable final World world, @Nonnull final List<ITextComponent> tooltip, @Nonnull final ITooltipFlag flag) {
+    public void appendHoverText(final @Nonnull ItemStack stack,
+                                final @Nullable World world,
+                                final @Nonnull List<ITextComponent> tooltip,
+                                final @Nonnull ITooltipFlag flag) {
         PotionUtils.addPotionTooltip(stack, tooltip, 1.0F);
         super.appendHoverText(stack, world, tooltip, flag);
     }
 
     @Nonnull
     @Override
-    public ItemStack finishUsingItem(@Nonnull ItemStack stack, @Nonnull World world, @Nonnull LivingEntity entity) {
+    public ItemStack finishUsingItem(final @Nonnull ItemStack stack,
+                                     final @Nonnull World world,
+                                     final @Nonnull LivingEntity entity) {
         PlayerEntity player = entity instanceof PlayerEntity ? (PlayerEntity) entity : null;
         if (player instanceof ServerPlayerEntity) {
             CriteriaTriggers.CONSUME_ITEM.trigger((ServerPlayerEntity) player, stack);

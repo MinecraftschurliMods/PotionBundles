@@ -6,7 +6,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.PotionItem;
+import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistries;
 
 /**
@@ -16,19 +18,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 public final class PotionBundleUtils {
     public static final String USES_KEY = "Uses";
     public static final String STRING_KEY = "String";
-    private static boolean init;
-    private static BiMap<ResourceLocation, ResourceLocation> REF_MAP;
 
     private PotionBundleUtils() {}
-
-    static void init() {
-        if (init) return;
-        init = true;
-        REF_MAP = HashBiMap.create();
-        REF_MAP.put(Items.POTION.getRegistryName(), PotionBundles.POTION_BUNDLE.getId());
-        REF_MAP.put(Items.SPLASH_POTION.getRegistryName(), PotionBundles.SPLASH_POTION_BUNDLE.getId());
-        REF_MAP.put(Items.LINGERING_POTION.getRegistryName(), PotionBundles.LINGERING_POTION_BUNDLE.getId());
-    }
 
     public static int getUses(final ItemStack stack) {
         return stack.getOrCreateTag().getInt(USES_KEY);
@@ -51,13 +42,16 @@ public final class PotionBundleUtils {
         stack.getOrCreateTag().put(STRING_KEY, string.serializeNBT());
     }
 
-    public static AbstractPotionBundle getBundleForPotion(final PotionItem potion) {
-        Item i = ForgeRegistries.ITEMS.getValue(REF_MAP.get(ForgeRegistries.ITEMS.getKey(potion)));
-        return i instanceof AbstractPotionBundle ? (AbstractPotionBundle) i : null;
-    }
-
-    public static PotionItem getPotionForBundle(final AbstractPotionBundle bundle) {
-        Item i = ForgeRegistries.ITEMS.getValue(REF_MAP.inverse().get(ForgeRegistries.ITEMS.getKey(bundle)));
-        return i instanceof PotionItem ? (PotionItem) i : null;
+    public static Item getPotionForBundle(final World world, final AbstractPotionBundle bundle) {
+        return world.getRecipeManager()
+                .getAllRecipesFor(IRecipeType.CRAFTING)
+                .stream()
+                .filter(recipe -> recipe.getSerializer() == PotionBundles.POTION_BUNDLE_RECIPE_SERIALIZER.get())
+                .filter(PotionBundleRecipe.class::isInstance)
+                .map(PotionBundleRecipe.class::cast)
+                .filter(recipe -> recipe.getBundleItem() == bundle)
+                .findFirst()
+                .map(PotionBundleRecipe::getPotionItem)
+                .orElse(null);
     }
 }

@@ -26,44 +26,56 @@ public abstract class AbstractPotionBundle extends PotionItem {
     }
 
     @Override
-    public void appendHoverText(final @Nonnull ItemStack stack, @Nullable final World world, @Nonnull final List<ITextComponent> tooltip, @Nonnull final ITooltipFlag flag) {
-        tooltip.add(new TranslationTextComponent(this.getDescriptionId() + ".uses", PotionBundleUtils.getUses(stack)));
+    public void appendHoverText(final @Nonnull ItemStack stack,
+                                final @Nullable World world,
+                                final @Nonnull List<ITextComponent> tooltip,
+                                final @Nonnull ITooltipFlag flag) {
+        tooltip.add(new TranslationTextComponent(
+                this.getDescriptionId() + ".uses",
+                PotionBundleUtils.getUses(stack)));
     }
 
     @Override
-    public double getDurabilityForDisplay(ItemStack stack) {
+    public double getDurabilityForDisplay(final ItemStack stack) {
         if (Config.CLIENT.durabilityBarColor.get() == -1) return 1;
         return (float)PotionBundleUtils.getUses(stack) / PotionBundles.POTION_BUNDLE_SIZE;
     }
 
     @Override
-    public int getRGBDurabilityForDisplay(ItemStack stack) {
+    public int getRGBDurabilityForDisplay(final ItemStack stack) {
         return Config.CLIENT.durabilityBarColor.get();
     }
 
     @Nonnull
     @Override
-    public ITextComponent getName(@Nonnull ItemStack stack) {
-        return new TranslationTextComponent(this.getDescriptionId(), new TranslationTextComponent(PotionUtils.getPotion(stack).getName(Util.makeDescriptionId("item", Items.POTION.getRegistryName()) + ".effect.")).getString());
+    public ITextComponent getName(final @Nonnull ItemStack stack) {
+        return new TranslationTextComponent(
+                this.getDescriptionId(),
+                new TranslationTextComponent(
+                        PotionUtils.getPotion(stack)
+                                .getName(
+                                        Util.makeDescriptionId(
+                                                "item",
+                                                Items.POTION.getRegistryName()
+                                        ) + ".effect."
+                                )
+                )
+        );
     }
 
     @Override
     public void fillItemCategory(final @Nonnull ItemGroup group, final @Nonnull NonNullList<ItemStack> items) {
-        if (this.allowdedIn(group) && this.isEnabled()) {
+        if (this.allowdedIn(group) && (this.isEnabled() || group == ItemGroup.TAB_SEARCH)) {
             for (Potion potion : ForgeRegistries.POTION_TYPES) {
-                if (potion == Potions.EMPTY) {
-                    continue;
-                }
+                if (potion == Potions.EMPTY) continue;
                 final ItemStack stack = this.createStack(new ItemStack(Items.STRING), potion);
-                if (!stack.isEmpty()) {
-                    items.add(stack);
-                }
+                if (!stack.isEmpty()) items.add(stack);
             }
         }
     }
 
     @Nonnull
-    protected ItemStack createStack(final ItemStack string, final Potion potion) {
+    protected ItemStack createStack(final @Nonnull ItemStack string, final @Nonnull Potion potion) {
         ItemStack stack = PotionUtils.setPotion(new ItemStack(this), potion);
         PotionBundleUtils.setUses(stack, PotionBundles.POTION_BUNDLE_SIZE);
         PotionBundleUtils.setString(stack, string);

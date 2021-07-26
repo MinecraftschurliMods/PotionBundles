@@ -17,7 +17,24 @@ public class ClientHandler {
             ItemModelsProperties.register(
                     PotionBundles.POTION_BUNDLE.get(),
                     new ResourceLocation(PotionBundles.MODID, "uses"),
-                    (stack, world, living) -> (!stack.hasTag() || !stack.getOrCreateTag().contains(PotionBundleUtils.USES_KEY))
+                    (stack, world, living) ->
+                            !stack.hasTag() || !stack.getOrCreateTag().contains(PotionBundleUtils.USES_KEY)
+                            ? 0
+                            : PotionBundleUtils.getUses(stack)
+            );
+            ItemModelsProperties.register(
+                    PotionBundles.SPLASH_POTION_BUNDLE.get(),
+                    new ResourceLocation(PotionBundles.MODID, "uses"),
+                    (stack, world, living) ->
+                            !stack.hasTag() || !stack.getOrCreateTag().contains(PotionBundleUtils.USES_KEY)
+                            ? 0
+                            : PotionBundleUtils.getUses(stack)
+            );
+            ItemModelsProperties.register(
+                    PotionBundles.LINGERING_POTION_BUNDLE.get(),
+                    new ResourceLocation(PotionBundles.MODID, "uses"),
+                    (stack, world, living) ->
+                            !stack.hasTag() || !stack.getOrCreateTag().contains(PotionBundleUtils.USES_KEY)
                             ? 0
                             : PotionBundleUtils.getUses(stack)
             );
@@ -26,6 +43,17 @@ public class ClientHandler {
 
     @SubscribeEvent
     public static void registerItemColorHandler(ColorHandlerEvent.Item e) {
-        e.getItemColors().register((stack, index) -> index > 0 ? -1 : PotionUtils.getColor(stack), PotionBundles.POTION_BUNDLE.get());
+        e.getItemColors().register(
+                (stack, index) -> index > 0 ? -1 : PotionUtils.getColor(stack),
+                PotionBundles.POTION_BUNDLE.get()
+        );
+        e.getItemColors().register(
+                (stack, index) -> index > 0 ? -1 : PotionUtils.getColor(stack),
+                PotionBundles.SPLASH_POTION_BUNDLE.get()
+        );
+        e.getItemColors().register(
+                (stack, index) -> index > 0 ? -1 : PotionUtils.getColor(stack),
+                PotionBundles.LINGERING_POTION_BUNDLE.get()
+        );
     }
 }

@@ -18,6 +18,14 @@ public class JEICompat implements IModPlugin {
 
     @Override
     public void registerItemSubtypes(ISubtypeRegistration r) {
-        r.registerSubtypeInterpreter(PotionBundles.POTION_BUNDLE.get(), (stack, context) -> String.valueOf(PotionUtils.getPotion(stack).getRegistryName()));
+        r.registerSubtypeInterpreter(
+                PotionBundles.POTION_BUNDLE.get(),
+                (stack, context) -> String.valueOf(PotionUtils.getPotion(stack).getRegistryName()));
+        r.registerSubtypeInterpreter(
+                PotionBundles.SPLASH_POTION_BUNDLE.get(),
+                (stack, context) -> String.valueOf(PotionUtils.getPotion(stack).getRegistryName()));
+        r.registerSubtypeInterpreter(
+                PotionBundles.LINGERING_POTION_BUNDLE.get(),
+                (stack, context) -> String.valueOf(PotionUtils.getPotion(stack).getRegistryName()));
     }
 }

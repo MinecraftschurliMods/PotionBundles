@@ -18,16 +18,23 @@ import javax.annotation.Nonnull;
 public abstract class AbstractThrowablePotionBundle extends AbstractPotionBundle {
     @Nonnull
     @Override
-    public ActionResult<ItemStack> use(final @Nonnull World world, final @Nonnull PlayerEntity player, final @Nonnull Hand hand) {
+    public ActionResult<ItemStack> use(final @Nonnull World world,
+                                       final @Nonnull PlayerEntity player,
+                                       final @Nonnull Hand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
         this.playThrowSound(world, player);
         if (!world.isClientSide) {
             PotionEntity thrownpotion = new PotionEntity(world, player);
-            ItemStack fake = new ItemStack(PotionBundleUtils.getPotionForBundle(this));
+            ItemStack fake = new ItemStack(PotionBundleUtils.getPotionForBundle(world, this));
             PotionUtils.setPotion(fake, PotionUtils.getPotion(itemstack));
             PotionUtils.setCustomEffects(fake, PotionUtils.getCustomEffects(itemstack));
             thrownpotion.setItem(fake);
-            thrownpotion.shootFromRotation(player, player.xRot, player.yRot, -20.0F, 0.5F, 1.0F);
+            thrownpotion.shootFromRotation(player,
+                    player.xRot,
+                    player.yRot,
+                    -20.0F,
+                    0.5F,
+                    1.0F);
             world.addFreshEntity(thrownpotion);
         }
 
@@ -41,5 +48,5 @@ public abstract class AbstractThrowablePotionBundle extends AbstractPotionBundle
         return ActionResult.sidedSuccess(itemstack, world.isClientSide());
     }
 
-    protected abstract void playThrowSound(final World world, final PlayerEntity player);
+    protected abstract void playThrowSound(final @Nonnull World world, final @Nonnull PlayerEntity player);
 }

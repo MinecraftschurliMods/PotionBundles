@@ -20,14 +20,24 @@ import java.util.List;
 public class LingeringPotionBundle extends AbstractThrowablePotionBundle {
 
     @Override
-    public void appendHoverText(@Nonnull final ItemStack stack, @Nullable final World world, @Nonnull final List<ITextComponent> tooltip, @Nonnull final ITooltipFlag flag) {
+    public void appendHoverText(final @Nonnull ItemStack stack,
+                                final @Nullable World world,
+                                final @Nonnull List<ITextComponent> tooltip,
+                                final @Nonnull ITooltipFlag flag) {
         PotionUtils.addPotionTooltip(stack, tooltip, 0.25F);
         super.appendHoverText(stack, world, tooltip, flag);
     }
 
     @Override
-    protected void playThrowSound(final World world, final PlayerEntity player) {
-        world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LINGERING_POTION_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
+    protected void playThrowSound(final @Nonnull World world, final @Nonnull PlayerEntity player) {
+        world.playSound(null,
+                player.getX(),
+                player.getY(),
+                player.getZ(),
+                SoundEvents.LINGERING_POTION_THROW,
+                SoundCategory.NEUTRAL,
+                0.5F,
+                0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
     }
 
     @Override
