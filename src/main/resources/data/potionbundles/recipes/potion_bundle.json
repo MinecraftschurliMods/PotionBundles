@@ -1,1 +1,6 @@
-{"type":"potionbundles:crafting_special_potion_bundle"}
+{
+  "type": "potionbundles:crafting_special_potion_bundle",
+  "string": {
+    "tag": "forge:string"
+  }
+}

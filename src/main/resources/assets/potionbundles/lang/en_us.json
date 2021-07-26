@@ -1,1 +1,8 @@
-{"item.potionbundles.potion_bundle":"%s Bundle","item.potionbundles.potion_bundle.uses":"%s uses left"}
+{
+  "item.potionbundles.potion_bundle": "%s Bundle",
+  "item.potionbundles.potion_bundle.uses": "%s uses left",
+  "item.potionbundles.splash_potion_bundle": "Bundle of %s",
+  "item.potionbundles.splash_potion_bundle.uses": "%s throws left",
+  "item.potionbundles.lingering_potion_bundle": "Bundle of %s",
+  "item.potionbundles.lingering_potion_bundle.uses": "%s throws left"
+}

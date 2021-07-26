@@ -13,7 +13,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 public class ClientHandler {
     @SubscribeEvent
     public static void clientSetup(final FMLClientSetupEvent e) {
-        e.enqueueWork(() -> ItemProperties.register(PotionBundles.POTION_BUNDLE.get(), new ResourceLocation(PotionBundles.MODID, "uses"), (stack, world, living, seed) -> !stack.hasTag() || !stack.getOrCreateTag().contains(PotionBundle.USES_KEY) ? 0 : stack.getOrCreateTag().getInt(PotionBundle.USES_KEY)));
+        e.enqueueWork(() -> ItemProperties.register(PotionBundles.POTION_BUNDLE.get(), new ResourceLocation(PotionBundles.MODID, "uses"), (stack, world, living, seed) -> !stack.hasTag() || !stack.getOrCreateTag().contains(PotionBundleUtils.USES_KEY) ? 0 : stack.getOrCreateTag().getInt(PotionBundleUtils.USES_KEY)));
     }
 
     @SubscribeEvent

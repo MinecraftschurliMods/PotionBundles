@@ -1,3 +1,7 @@
+//file:noinspection GroovyAssignabilityCheck
+import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
+
 buildscript {
     repositories {
         maven { url = 'https://files.minecraftforge.net/maven' }
@@ -51,7 +55,7 @@ minecraft {
         data {
             workingDirectory project.file('run')
             property 'forge.logging.console.level', 'debug'
-            args '--mod', "${project.mod_id}", '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            args '--mod', "${project.mod_id}", '--all', '--output', file('src/main/generated/'), '--existing', file('src/main/resources/')
             mods {
                 potionbundles {
                     source sourceSets.main
@@ -61,7 +65,7 @@ minecraft {
     }
 }
 
-sourceSets.main.resources { srcDir 'src/generated/resources' }
+sourceSets.main.resources { srcDir 'src/main/generated' }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${project.mc_version}-${project.forge_version}"
@@ -71,6 +75,7 @@ dependencies {
 }
 
 processResources {
+    duplicatesStrategy DuplicatesStrategy.INCLUDE
     from(sourceSets.main.resources.srcDirs) {
         include 'META-INF/mods.toml'
         expand 'mod_id': mod_id,
@@ -86,7 +91,11 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude 'META-INF/mods.toml'
     }
-    duplicatesStrategy DuplicatesStrategy.INCLUDE
+    doLast {
+        fileTree(dir: outputs.files.asPath, include: "**/*.json").each {
+            it.text = JsonOutput.toJson(new JsonSlurper().parse(it))
+        }
+    }
 }
 
 jar {
