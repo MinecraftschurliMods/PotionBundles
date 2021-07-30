@@ -18,34 +18,21 @@ import javax.annotation.Nonnull;
 public abstract class AbstractThrowablePotionBundle extends AbstractPotionBundle {
     @Nonnull
     @Override
-    public InteractionResultHolder<ItemStack> use(final @Nonnull Level world,
-                                                  final @Nonnull Player player,
-                                                  final @Nonnull InteractionHand hand) {
+    public InteractionResultHolder<ItemStack> use(@Nonnull Level world, @Nonnull Player player, @Nonnull InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
-        this.playThrowSound(world, player);
+        playThrowSound(world, player);
         if (!world.isClientSide) {
             ThrownPotion thrownpotion = new ThrownPotion(world, player);
             ItemStack fake = new ItemStack(PotionBundleUtils.getPotionForBundle(world, this));
             PotionUtils.setPotion(fake, PotionUtils.getPotion(itemstack));
             PotionUtils.setCustomEffects(fake, PotionUtils.getCustomEffects(itemstack));
             thrownpotion.setItem(fake);
-            thrownpotion.shootFromRotation(
-                    player,
-                    player.getXRot(),
-                    player.getYRot(),
-                    -20.0F,
-                    0.5F,
-                    1.0F);
+            thrownpotion.shootFromRotation(player, player.getXRot(), player.getYRot(), -20F, 0.5F, 1F);
             world.addFreshEntity(thrownpotion);
         }
-
         PotionBundleUtils.decrementUses(itemstack);
         player.awardStat(Stats.ITEM_USED.get(this));
-
-        if (PotionBundleUtils.getUses(itemstack) == 0) {
-            itemstack = Config.SERVER.returnString.get() ? PotionBundleUtils.getString(itemstack) : ItemStack.EMPTY;
-        }
-
+        if (PotionBundleUtils.getUses(itemstack) == 0) itemstack = Config.SERVER.returnString.get() ? PotionBundleUtils.getString(itemstack) : ItemStack.EMPTY;
         return InteractionResultHolder.sidedSuccess(itemstack, world.isClientSide());
     }
 

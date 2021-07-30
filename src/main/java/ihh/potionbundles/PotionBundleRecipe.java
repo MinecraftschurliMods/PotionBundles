@@ -26,10 +26,7 @@ public class PotionBundleRecipe extends CustomRecipe {
     private final Item potion;
     private final AbstractPotionBundle bundle;
 
-    public PotionBundleRecipe(final ResourceLocation id,
-                              final Ingredient string,
-                              final Item potion,
-                              final AbstractPotionBundle bundle) {
+    public PotionBundleRecipe(ResourceLocation id, Ingredient string, Item potion, AbstractPotionBundle bundle) {
         super(id);
         this.string = string;
         this.potion = potion;
@@ -37,7 +34,7 @@ public class PotionBundleRecipe extends CustomRecipe {
     }
 
     @Override
-    public boolean matches(final CraftingContainer inv, final @Nonnull Level world) {
+    public boolean matches(CraftingContainer inv, @Nonnull Level world) {
         int potions = 0;
         boolean string = false;
         Potion potion = Potions.EMPTY;
@@ -47,45 +44,31 @@ public class PotionBundleRecipe extends CustomRecipe {
                 if (string) return false;
                 string = true;
             } else if (is.getItem() == this.potion) {
-                if (this.bundle != null && this.bundle.isEnabled()) {
+                if (bundle != null) {
                     if (potions == 0) {
                         potion = PotionUtils.getPotion(is);
                         potions++;
                     } else if (potions > 0) {
-                        if (PotionUtils.getPotion(is) != potion) {
-                            return false;
-                        }
+                        if (PotionUtils.getPotion(is) != potion) return false;
                         potions++;
                     }
-                    if (potions > PotionBundles.POTION_BUNDLE_SIZE) {
-                        return false;
-                    }
-                } else if (!is.isEmpty()) {
-                    return false;
-                }
-            } else if (!is.isEmpty()) {
-                return false;
-            }
+                    if (potions > PotionBundles.POTION_BUNDLE_SIZE) return false;
+                } else if (!is.isEmpty()) return false;
+            } else if (!is.isEmpty()) return false;
         }
         return potions == PotionBundles.POTION_BUNDLE_SIZE && string;
     }
 
     @Nonnull
     @Override
-    public ItemStack assemble(final CraftingContainer inv) {
+    public ItemStack assemble(CraftingContainer inv) {
         Potion potion = null;
         ItemStack string = null;
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack is = inv.getItem(i);
-            if (potion == null && is.getItem() == this.potion) {
-                potion = PotionUtils.getPotion(is);
-            }
-            if (string == null && this.string.test(is)) {
-                string = is;
-            }
-            if (potion != null && string != null) {
-                return this.bundle.createStack(string, potion);
-            }
+            if (potion == null && is.getItem() == this.potion) potion = PotionUtils.getPotion(is);
+            if (string == null && this.string.test(is)) string = is;
+            if (potion != null && string != null) return bundle.createStack(string, potion);
         }
         return ItemStack.EMPTY;
     }
@@ -102,33 +85,27 @@ public class PotionBundleRecipe extends CustomRecipe {
     }
 
     public AbstractPotionBundle getBundleItem() {
-        return this.bundle;
+        return bundle;
     }
 
     public Item getPotionItem() {
-        return this.potion;
+        return potion;
     }
 
-    static class Serializer
-            extends ForgeRegistryEntry<RecipeSerializer<?>>
-            implements RecipeSerializer<PotionBundleRecipe> {
-
+    static class Serializer extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<PotionBundleRecipe> {
         @Nonnull
         @Override
-        public PotionBundleRecipe fromJson(final @Nonnull ResourceLocation rl, final @Nonnull JsonObject json) {
+        public PotionBundleRecipe fromJson(@Nonnull ResourceLocation rl, @Nonnull JsonObject json) {
             Ingredient string = Ingredient.fromJson(json.get("string"));
             Item potion = ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse(json.get("potion").getAsString()));
             Item bundle = ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse(json.get("bundle").getAsString()));
-            if (bundle instanceof AbstractPotionBundle bundle1) {
-                return new PotionBundleRecipe(rl, string, potion, bundle1);
-            } else {
-                throw new JsonParseException("The defined PotionBundle is not an instance of AbstractPotionBundle");
-            }
+            if (bundle instanceof AbstractPotionBundle bundle1) return new PotionBundleRecipe(rl, string, potion, bundle1);
+            else throw new JsonParseException("The defined PotionBundle is not an instance of AbstractPotionBundle");
         }
 
         @Nullable
         @Override
-        public PotionBundleRecipe fromNetwork(final @Nonnull ResourceLocation rl, final @Nonnull FriendlyByteBuf buf) {
+        public PotionBundleRecipe fromNetwork(@Nonnull ResourceLocation rl, @Nonnull FriendlyByteBuf buf) {
             Ingredient string = Ingredient.fromNetwork(buf);
             Item potion = ForgeRegistries.ITEMS.getValue(buf.readResourceLocation());
             Item bundle = ForgeRegistries.ITEMS.getValue(buf.readResourceLocation());
@@ -136,7 +113,7 @@ public class PotionBundleRecipe extends CustomRecipe {
         }
 
         @Override
-        public void toNetwork(final @Nonnull FriendlyByteBuf buf, final @Nonnull PotionBundleRecipe recipe) {
+        public void toNetwork(@Nonnull FriendlyByteBuf buf, @Nonnull PotionBundleRecipe recipe) {
             recipe.string.toNetwork(buf);
             buf.writeResourceLocation(Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(recipe.potion)));
             buf.writeResourceLocation(Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(recipe.bundle)));

@@ -18,30 +18,14 @@ import java.util.List;
  * @version 2021-07-26
  */
 public class SplashPotionBundle extends AbstractThrowablePotionBundle {
-
     @Override
-    public void appendHoverText(final @Nonnull ItemStack stack,
-                                final @Nullable Level world,
-                                final @Nonnull List<Component> tooltip,
-                                final @Nonnull TooltipFlag flag) {
-        PotionUtils.addPotionTooltip(stack, tooltip, 1.0F);
+    public void appendHoverText(@Nonnull ItemStack stack, Level world, @Nonnull List<Component> tooltip, @Nonnull TooltipFlag flag) {
+        PotionUtils.addPotionTooltip(stack, tooltip, 1F);
         super.appendHoverText(stack, world, tooltip, flag);
     }
 
     @Override
-    protected boolean isEnabled() {
-        return Config.SERVER.allowSplashPotion.get();
-    }
-
-    @Override
     protected void playThrowSound(final @Nonnull Level world, final @Nonnull Player player) {
-        world.playSound(null,
-                player.getX(),
-                player.getY(),
-                player.getZ(),
-                SoundEvents.SPLASH_POTION_THROW,
-                SoundSource.PLAYERS,
-                0.5F,
-                0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
+        world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SPLASH_POTION_THROW, SoundSource.PLAYERS, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
     }
 }

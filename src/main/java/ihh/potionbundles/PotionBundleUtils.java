@@ -16,37 +16,28 @@ public final class PotionBundleUtils {
 
     private PotionBundleUtils() {}
 
-    public static int getUses(final ItemStack stack) {
+    public static int getUses(ItemStack stack) {
         return stack.getOrCreateTag().getInt(USES_KEY);
     }
 
-    public static void setUses(final ItemStack stack, int uses) {
+    public static void setUses(ItemStack stack, int uses) {
         stack.getOrCreateTag().putInt(USES_KEY, uses);
     }
 
-    public static void decrementUses(final ItemStack stack) {
+    public static void decrementUses(ItemStack stack) {
         setUses(stack, getUses(stack) - 1);
     }
 
-    public static ItemStack getString(final ItemStack stack) {
+    public static ItemStack getString(ItemStack stack) {
         ItemStack s = ItemStack.of(stack.getOrCreateTag().getCompound(STRING_KEY));
         return s.isEmpty() ? new ItemStack(Items.STRING) : s;
     }
 
-    public static void setString(final ItemStack stack, final ItemStack string) {
+    public static void setString(ItemStack stack, ItemStack string) {
         stack.getOrCreateTag().put(STRING_KEY, string.serializeNBT());
     }
 
-    public static Item getPotionForBundle(final Level world, final AbstractPotionBundle bundle) {
-        return world.getRecipeManager()
-                .getAllRecipesFor(RecipeType.CRAFTING)
-                .stream()
-                .filter(recipe -> recipe.getSerializer() == PotionBundles.POTION_BUNDLE_RECIPE_SERIALIZER.get())
-                .filter(PotionBundleRecipe.class::isInstance)
-                .map(PotionBundleRecipe.class::cast)
-                .filter(recipe -> recipe.getBundleItem() == bundle)
-                .findFirst()
-                .map(PotionBundleRecipe::getPotionItem)
-                .orElse(null);
+    public static Item getPotionForBundle(Level world, AbstractPotionBundle bundle) {
+        return world.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream().filter(recipe -> recipe.getSerializer() == PotionBundles.POTION_BUNDLE_RECIPE_SERIALIZER.get()).filter(PotionBundleRecipe.class::isInstance).map(PotionBundleRecipe.class::cast).filter(recipe -> recipe.getBundleItem() == bundle).findFirst().map(PotionBundleRecipe::getPotionItem).orElse(null);
     }
 }
