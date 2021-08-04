@@ -24,10 +24,14 @@ public abstract class AbstractPotionBundle extends PotionItem {
         super(new Item.Properties().tab(CreativeModeTab.TAB_BREWING).stacksTo(1));
     }
 
+    protected int getMaxUses() {
+        return PotionBundles.POTION_BUNDLE_SIZE;
+    }
+
     @Override
     public double getDurabilityForDisplay(ItemStack stack) {
         if (Config.CLIENT.durabilityBarColor.get() == -1) return 1;
-        return (float)PotionBundleUtils.getUses(stack) / PotionBundles.POTION_BUNDLE_SIZE;
+        return (float)PotionBundleUtils.getUses(stack) / getMaxUses();
     }
 
     @Override
@@ -48,8 +52,8 @@ public abstract class AbstractPotionBundle extends PotionItem {
 
     @Override
     public void fillItemCategory(@Nonnull CreativeModeTab group, @Nonnull NonNullList<ItemStack> items) {
-        if (allowdedIn(group)) {
-            for (Potion potion : ForgeRegistries.POTION_TYPES) {
+        if (allowdedIn(group) && (isEnabled() || CreativeModeTab.TAB_SEARCH == group)) {
+            for (Potion potion : ForgeRegistries.POTIONS) {
                 if (potion == Potions.EMPTY) continue;
                 ItemStack stack = createStack(new ItemStack(Items.STRING), potion);
                 if (!stack.isEmpty()) items.add(stack);
@@ -60,8 +64,10 @@ public abstract class AbstractPotionBundle extends PotionItem {
     @Nonnull
     protected ItemStack createStack(@Nonnull ItemStack string, @Nonnull Potion potion) {
         ItemStack stack = PotionUtils.setPotion(new ItemStack(this), potion);
-        PotionBundleUtils.setUses(stack, PotionBundles.POTION_BUNDLE_SIZE);
+        PotionBundleUtils.setUses(stack, getMaxUses());
         PotionBundleUtils.setString(stack, string);
         return stack;
     }
+
+    protected abstract boolean isEnabled();
 }

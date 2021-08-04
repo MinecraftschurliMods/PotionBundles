@@ -10,7 +10,6 @@ import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -27,5 +26,10 @@ public class SplashPotionBundle extends AbstractThrowablePotionBundle {
     @Override
     protected void playThrowSound(final @Nonnull Level world, final @Nonnull Player player) {
         world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SPLASH_POTION_THROW, SoundSource.PLAYERS, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
+    }
+
+    @Override
+    protected boolean isEnabled() {
+        return Config.SERVER.allowSplashPotion.get();
     }
 }

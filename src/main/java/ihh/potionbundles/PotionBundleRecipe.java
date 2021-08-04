@@ -22,11 +22,11 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 
 public class PotionBundleRecipe extends CustomRecipe {
-    private final Ingredient string;
-    private final Item potion;
-    private final AbstractPotionBundle bundle;
+    private @Nonnull final Ingredient string;
+    private @Nonnull final Item potion;
+    private @Nonnull final AbstractPotionBundle bundle;
 
-    public PotionBundleRecipe(ResourceLocation id, Ingredient string, Item potion, AbstractPotionBundle bundle) {
+    public PotionBundleRecipe(ResourceLocation id, @Nonnull Ingredient string, @Nonnull Item potion, @Nonnull AbstractPotionBundle bundle) {
         super(id);
         this.string = string;
         this.potion = potion;
@@ -44,7 +44,7 @@ public class PotionBundleRecipe extends CustomRecipe {
                 if (string) return false;
                 string = true;
             } else if (is.getItem() == this.potion) {
-                if (bundle != null) {
+                if (this.bundle.isEnabled()) {
                     if (potions == 0) {
                         potion = PotionUtils.getPotion(is);
                         potions++;
@@ -52,11 +52,11 @@ public class PotionBundleRecipe extends CustomRecipe {
                         if (PotionUtils.getPotion(is) != potion) return false;
                         potions++;
                     }
-                    if (potions > PotionBundles.POTION_BUNDLE_SIZE) return false;
+                    if (potions > this.bundle.getMaxUses()) return false;
                 } else if (!is.isEmpty()) return false;
             } else if (!is.isEmpty()) return false;
         }
-        return potions == PotionBundles.POTION_BUNDLE_SIZE && string;
+        return potions == this.bundle.getMaxUses() && string;
     }
 
     @Nonnull
@@ -68,14 +68,14 @@ public class PotionBundleRecipe extends CustomRecipe {
             ItemStack is = inv.getItem(i);
             if (potion == null && is.getItem() == this.potion) potion = PotionUtils.getPotion(is);
             if (string == null && this.string.test(is)) string = is;
-            if (potion != null && string != null) return bundle.createStack(string, potion);
+            if (potion != null && string != null) return this.bundle.createStack(string, potion);
         }
         return ItemStack.EMPTY;
     }
 
     @Override
     public boolean canCraftInDimensions(int width, int height) {
-        return width * height > PotionBundles.POTION_BUNDLE_SIZE;
+        return width * height > this.bundle.getMaxUses();
     }
 
     @Nonnull
@@ -85,11 +85,11 @@ public class PotionBundleRecipe extends CustomRecipe {
     }
 
     public AbstractPotionBundle getBundleItem() {
-        return bundle;
+        return this.bundle;
     }
 
     public Item getPotionItem() {
-        return potion;
+        return this.potion;
     }
 
     static class Serializer extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<PotionBundleRecipe> {
@@ -98,9 +98,11 @@ public class PotionBundleRecipe extends CustomRecipe {
         public PotionBundleRecipe fromJson(@Nonnull ResourceLocation rl, @Nonnull JsonObject json) {
             Ingredient string = Ingredient.fromJson(json.get("string"));
             Item potion = ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse(json.get("potion").getAsString()));
+            if (potion == null) throw new JsonParseException("Tried using an invalid item as potion item for recipe "+rl);
             Item bundle = ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse(json.get("bundle").getAsString()));
+            if (bundle == null) throw new JsonParseException("Tried using an invalid item as potion bundle item for recipe "+rl);
             if (bundle instanceof AbstractPotionBundle bundle1) return new PotionBundleRecipe(rl, string, potion, bundle1);
-            else throw new JsonParseException("The defined PotionBundle is not an instance of AbstractPotionBundle");
+            else throw new JsonParseException("The defined PotionBundle is not an instance of AbstractPotionBundle in recipe "+rl);
         }
 
         @Nullable

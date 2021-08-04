@@ -15,7 +15,6 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 
 public class PotionBundle extends AbstractPotionBundle {
@@ -40,5 +39,10 @@ public class PotionBundle extends AbstractPotionBundle {
             ItemHandlerHelper.giveItemToPlayer(player, new ItemStack(Items.GLASS_BOTTLE));
         }
         return PotionBundleUtils.getUses(stack) == 0 ? Config.SERVER.returnString.get() ? PotionBundleUtils.getString(stack) : ItemStack.EMPTY : stack;
+    }
+
+    @Override
+    protected boolean isEnabled() {
+        return true;
     }
 }

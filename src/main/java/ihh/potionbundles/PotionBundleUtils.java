@@ -38,6 +38,15 @@ public final class PotionBundleUtils {
     }
 
     public static Item getPotionForBundle(Level world, AbstractPotionBundle bundle) {
-        return world.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream().filter(recipe -> recipe.getSerializer() == PotionBundles.POTION_BUNDLE_RECIPE_SERIALIZER.get()).filter(PotionBundleRecipe.class::isInstance).map(PotionBundleRecipe.class::cast).filter(recipe -> recipe.getBundleItem() == bundle).findFirst().map(PotionBundleRecipe::getPotionItem).orElse(null);
+        return world.getRecipeManager()
+                .getAllRecipesFor(RecipeType.CRAFTING)
+                .stream()
+                .filter(recipe -> recipe.getSerializer() == PotionBundles.POTION_BUNDLE_RECIPE_SERIALIZER.get())
+                .filter(PotionBundleRecipe.class::isInstance)
+                .map(PotionBundleRecipe.class::cast)
+                .filter(recipe -> recipe.getBundleItem() == bundle)
+                .findFirst()
+                .map(PotionBundleRecipe::getPotionItem)
+                .orElse(null);
     }
 }

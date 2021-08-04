@@ -15,6 +15,19 @@ apply plugin: 'net.minecraftforge.gradle'
 //--------------
 apply plugin: 'idea'
 
+group = "${project.mod_group}"
+version = "${project.mc_version}-${project.mod_version}"
+archivesBaseName = "${project.mod_id}"
+java.toolchain.languageVersion = JavaLanguageVersion.of(project.java_version)
+
+sourceSets {
+    main {
+        resources {
+            srcDir 'src/main/generated'
+        }
+    }
+}
+
 repositories {
     maven {
         name = "Progwml6 maven"
@@ -24,12 +37,23 @@ repositories {
         name = "ModMaven"
         url = "https://modmaven.k-4u.nl"
     }
+//    maven {
+//        name = 'saps maven'
+//        url = 'https://maven.saps.dev/minecraft/'
+//    } TODO: add when ftb library updates to mojmaps
+    mavenLocal()
 }
 
-group = "${project.mod_group}"
-version = "${project.mc_version}-${project.mod_version}"
-archivesBaseName = "${project.mod_id}"
-java.toolchain.languageVersion = JavaLanguageVersion.of(project.java_version)
+dependencies {
+    minecraft "net.minecraftforge:forge:${project.mc_version}-${project.forge_version}"
+    //JEI is not on 1.17 yet (using mavenLocal)
+    compileOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${project.jei_version}:api")
+    runtimeOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${project.jei_version}")
+
+//    implementation fg.deobf("dev.ftb.mods:ftb-library-forge:${project.ftb_library_version}") {
+//        transitive false
+//    } TODO: add when ftb library updates to mojmaps
+}
 
 minecraft {
     mappings channel: "${project.mappings_channel}", version: "${project.mappings_version}"
@@ -65,31 +89,27 @@ minecraft {
     }
 }
 
-sourceSets.main.resources { srcDir 'src/main/generated' }
-
-dependencies {
-    minecraft "net.minecraftforge:forge:${project.mc_version}-${project.forge_version}"
-    //JEI is not on 1.17 yet
-    //compileOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${project.jei_version}:api")
-    //runtimeOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${project.jei_version}")
-}
+def replaceIn = ['META-INF/mods.toml']
+def replacements = [
+        'mod_id': mod_id,
+        'mod_name': mod_name,
+        'mod_version': mod_version,
+        'mod_url': mod_url,
+        'mod_authors': mod_authors,
+        'mod_description': mod_description,
+        'mc_version_range': mc_version_range,
+        'forge_version_range': forge_version_range,
+        'loader_version_range': loader_version_range
+]
 
 processResources {
     duplicatesStrategy DuplicatesStrategy.INCLUDE
     from(sourceSets.main.resources.srcDirs) {
-        include 'META-INF/mods.toml'
-        expand 'mod_id': mod_id,
-                'mod_name': mod_name,
-                'mod_version': mod_version,
-                'mod_url': mod_url,
-                'mod_authors': mod_authors,
-                'mod_description': mod_description,
-                'mc_version_range': mc_version_range,
-                'forge_version_range': forge_version_range,
-                'loader_version_range': loader_version_range
+        include replaceIn
+        expand replacements
     }
     from(sourceSets.main.resources.srcDirs) {
-        exclude 'META-INF/mods.toml'
+        exclude replaceIn
     }
     doLast {
         fileTree(dir: outputs.files.asPath, include: "**/*.json").each {
@@ -100,7 +120,7 @@ processResources {
 
 jar {
     manifest {
-        mainAttributes(
+        mainAttributes([
                 "Maven-Artifact": "${project.mod_group}:${project.archivesBaseName}:${project.version}",
                 "Specification-Title": archivesBaseName,
                 "Specification-Vendor": "${project.mod_authors}",
@@ -111,7 +131,7 @@ jar {
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
                 "Built-On-Java": "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
                 "Built-On": "${project.mc_version}-${project.forge_version}"
-        )
+        ])
     }
 }
 jar.finalizedBy('reobfJar')
