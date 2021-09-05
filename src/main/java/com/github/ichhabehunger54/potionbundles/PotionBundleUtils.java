@@ -1,4 +1,4 @@
-package ihh.potionbundles;
+package com.github.ichhabehunger54.potionbundles;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;

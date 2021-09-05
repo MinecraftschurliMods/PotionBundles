@@ -1,4 +1,4 @@
-package ihh.potionbundles;
+package com.github.ichhabehunger54.potionbundles;
 
 import net.minecraft.Util;
 import net.minecraft.core.NonNullList;

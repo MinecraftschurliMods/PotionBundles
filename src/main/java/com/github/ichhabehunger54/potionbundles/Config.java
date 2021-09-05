@@ -1,4 +1,4 @@
-package ihh.potionbundles;
+package com.github.ichhabehunger54.potionbundles;
 
 //import dev.ftb.mods.ftblibrary.config.ColorConfig;
 //import dev.ftb.mods.ftblibrary.config.ConfigGroup;

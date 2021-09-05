@@ -1,4 +1,4 @@
-package ihh.potionbundles;
+package com.github.ichhabehunger54.potionbundles;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;

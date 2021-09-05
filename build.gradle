@@ -5,20 +5,56 @@ import groovy.json.JsonOutput
 buildscript {
     repositories {
         maven { url = 'https://files.minecraftforge.net/maven' }
+        maven { url = 'https://maven.parchmentmc.org' }
         mavenCentral()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: "${project.forgegradle_version}", changing: true
+        classpath group: 'org.parchmentmc', name: 'librarian', version: "${project.librarian_version}"
     }
 }
+
+plugins {
+    id 'org.ajoberstar.grgit' version '4.1.0'
+    id 'maven-publish'
+    id 'eclipse'
+    id 'idea'
+}
+
 apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.parchmentmc.librarian.forgegradle'
 //--------------
-apply plugin: 'idea'
 
 group = "${project.mod_group}"
 version = "${project.mc_version}-${project.mod_version}"
 archivesBaseName = "${project.mod_id}"
-java.toolchain.languageVersion = JavaLanguageVersion.of(project.java_version)
+
+if (System.getenv('RELEASE_TYPE') != null) {
+    status = System.getenv('RELEASE_TYPE')
+    switch (status) {
+        case 'snapshot':
+            version = "${version}+${grgit.head().abbreviatedId}"
+            break
+        case 'alpha':
+        case 'beta':
+        case 'final':
+            version = "${version}-${status}"
+            break
+    }
+}
+
+java {
+    withSourcesJar()
+
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(project.java_version)
+        vendor = JvmVendorSpec.ADOPTOPENJDK
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
 
 sourceSets {
     main {
@@ -29,6 +65,12 @@ sourceSets {
 }
 
 repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+        name = 'Minecraftschurli Maven'
+        url = 'https://minecraftschurli.ddns.net/repository'
+    }
     maven {
         name = "Progwml6 maven"
         url = "https://dvs1.progwml6.com/files/maven/"
@@ -40,19 +82,18 @@ repositories {
 //    maven {
 //        name = 'saps maven'
 //        url = 'https://maven.saps.dev/minecraft/'
-//    } TODO: add when ftb library updates to mojmaps
-    mavenLocal()
+//    } TODO: add when ftb library updates to 1.17
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${project.mc_version}-${project.forge_version}"
-    //JEI is not on 1.17 yet (using mavenLocal)
+    // JEI
     compileOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${project.jei_version}:api")
     runtimeOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${project.jei_version}")
 
 //    implementation fg.deobf("dev.ftb.mods:ftb-library-forge:${project.ftb_library_version}") {
 //        transitive false
-//    } TODO: add when ftb library updates to mojmaps
+//    } TODO: add when ftb library updates to 1.17
 }
 
 minecraft {
@@ -119,19 +160,128 @@ processResources {
 }
 
 jar {
+    from sourceSets.main.output
+    finalizedBy('reobfJar')
+}
+
+sourcesJar {
+    from sourceSets.main.allSource
+}
+
+tasks.withType(Jar).configureEach {
+    String extension = ''
+    if (it.archiveClassifier.present) {
+        extension = it.archiveClassifier.get()
+        if (extension != '') {
+            extension = '-' + extension
+        }
+    }
     manifest {
         mainAttributes([
-                "Maven-Artifact": "${project.mod_group}:${project.archivesBaseName}:${project.version}",
-                "Specification-Title": archivesBaseName,
-                "Specification-Vendor": "${project.mod_authors}",
-                "Specification-Version": "1",
-                "Implementation-Title": "${archivesBaseName}",
-                "Implementation-Version": "${project.mod_version}",
-                "Implementation-Vendor": "${project.mod_authors}",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "Built-On-Java": "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
-                "Built-On": "${project.mc_version}-${project.forge_version}"
+                'Maven-Artifact': "${project.mod_group}:${project.archivesBaseName}:${project.version}",
+                'Specification-Title': archivesBaseName,
+                'Specification-Vendor': "${project.vendor}",
+                'Specification-Version': '1',
+                'Implementation-Title': "${archivesBaseName}${extension}",
+                'Implementation-Version': "${project.mod_version}",
+                'Implementation-Vendor': "${project.vendor}",
+                'Built-On-Java': "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
+                'Built-On': "${project.mc_version}-${project.forge_version}",
+                'Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                'Git-Commit': "${grgit.head().abbreviatedId}",
+                'Git-Branch': "${grgit.branch.current().fullName.split('/').drop(2).join('/')}",
+                'FMLModType': 'MOD'
         ])
     }
 }
-jar.finalizedBy('reobfJar')
+
+artifacts {
+    archives jar
+    archives sourcesJar
+}
+
+reobf {
+    jar { classpath.from(sourceSets.main.compileClasspath) }
+}
+
+task reobf {
+    dependsOn reobfJar
+}
+
+idea {
+    module {
+        for (String exclude in ['run', 'out', 'libs']) {
+            excludeDirs += file(exclude)
+        }
+    }
+}
+
+publishing {
+    publications.create(project.archivesBaseName+'ToMaven', MavenPublication) {
+        groupId = project.group
+        artifactId = project.archivesBaseName
+        version = project.version
+        from components.java
+        pom {
+            name = project.mod_name
+            url = project.mod_url
+            packaging = 'jar'
+            scm {
+                connection = "scm:git:git://github.com/${project.github}.git"
+                developerConnection = "scm:git:git@github.com:${project.github}.git"
+                url = "https://github.com/${project.github}"
+            }
+            issueManagement {
+                system = 'github'
+                url = "https://github.com/${project.github}.git/issues"
+            }
+            organization {
+                name = 'Minecraftschurli Mods'
+                url = 'https://github.com/MinecraftschurliMods'
+            }
+            developers {
+                developer {
+                    id = 'minecraftschurli'
+                    name = 'Minecraftschurli'
+                    url = 'https://github.com/Minecraftschurli'
+                    email = 'minecraftschurli@gmail.com'
+                    organization = 'Minecraftschurli Mods'
+                    organizationUrl = 'https://github.com/MinecraftschurliMods'
+                    timezone = 'Europe/Vienna'
+                }
+                developer {
+                    id = 'ichhabehunger54'
+                    name = 'IchHabeHunger54'
+                    url = 'https://github.com/IchHabeHunger54'
+                    organization = 'Minecraftschurli Mods'
+                    organizationUrl = 'https://github.com/MinecraftschurliMods'
+                    timezone = 'Europe/Vienna'
+                }
+            }
+            withXml {
+                asNode().dependencies.dependency.each { dep ->
+                    if(dep.version.last().value().last().contains('_mapped_')) {
+                        assert dep.parent().remove(dep)
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            if (
+            (System.getenv("MAVEN_USER") != null) &&
+                    (System.getenv("MAVEN_PASSWORD") != null) &&
+                    (System.getenv("MAVEN_URL") != null)
+            ) {
+                url System.getenv("MAVEN_URL")
+                credentials {
+                    username System.getenv("MAVEN_USER")
+                    password System.getenv("MAVEN_PASSWORD")
+                }
+            } else {
+                url "$buildDir/repo"
+            }
+        }
+    }
+}

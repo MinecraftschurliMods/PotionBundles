@@ -1,4 +1,4 @@
-package ihh.potionbundles;
+package com.github.ichhabehunger54.potionbundles;
 
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
