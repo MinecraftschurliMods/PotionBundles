@@ -233,6 +233,10 @@ idea {
     }
 }
 
+tasks.withType(GenerateModuleMetadata) {
+    enabled = false
+}
+
 publishing {
     publications.create(project.archivesBaseName+'ToMaven', MavenPublication) {
         groupId = project.group
