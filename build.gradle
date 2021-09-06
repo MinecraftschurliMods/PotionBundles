@@ -208,6 +208,23 @@ task reobf {
     dependsOn reobfJar
 }
 
+task setupGithubActions() {
+    doLast {
+        println "##[set-output name=modid;]${project.mod_id}"
+        if(project.hasProperty('curse_project_id')) {
+            println "##[set-output name=project_id;]${project.curse_project_id}"
+            if(project.hasProperty('curse_title')) {
+                println "##[set-output name=curse_title;]${project.curse_title}"
+            }
+            println "##[set-output name=curse_versions;]${project.curse_versions}"
+            if(project.hasProperty('curse_relations')) {
+                println "##[set-output name=curse_relations;]${project.curse_relations}"
+            }
+        }
+        println "##[set-output name=version;]${project.version}"
+    }
+}
+
 idea {
     module {
         for (String exclude in ['run', 'out', 'libs']) {
