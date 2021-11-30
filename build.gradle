@@ -78,23 +78,15 @@ repositories {
         name = "ModMaven"
         url = "https://modmaven.k-4u.nl"
     }
-//    maven {
-//        name = 'saps maven'
-//        url = 'https://maven.saps.dev/minecraft/'
-//    } TODO: add when ftb library updates to 1.17
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${project.mc_version}-${project.forge_version}"
 
-    // TODO commented out until jei releases for 1.18
     // JEI
-    //compileOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${project.jei_version}:api")
+    compileOnly fg.deobf("mezz.jei:jei-1.17.1:${project.jei_version}:api")
+    // TODO commented out until jei releases for 1.18
     //runtimeOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${project.jei_version}")
-
-//    implementation fg.deobf("dev.ftb.mods:ftb-library-forge:${project.ftb_library_version}") {
-//        transitive false
-//    } TODO: add when ftb library updates to 1.17
 }
 
 minecraft {
