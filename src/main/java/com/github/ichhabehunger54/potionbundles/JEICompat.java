@@ -1,3 +1,4 @@
+/*
 package com.github.ichhabehunger54.potionbundles;
 
 import mezz.jei.api.IModPlugin;
@@ -21,3 +22,4 @@ public class JEICompat implements IModPlugin {
         r.registerSubtypeInterpreter(PotionBundles.POTION_BUNDLE.get(), (ingredient, context) -> String.valueOf(PotionUtils.getPotion(ingredient).getRegistryName()));
     }
 }
+*/

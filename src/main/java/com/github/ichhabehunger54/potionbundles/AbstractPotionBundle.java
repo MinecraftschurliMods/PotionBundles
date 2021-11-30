@@ -29,9 +29,9 @@ public abstract class AbstractPotionBundle extends PotionItem {
     }
 
     @Override
-    public double getDurabilityForDisplay(ItemStack stack) {
+    public int getBarWidth(ItemStack stack) {
         if (Config.CLIENT.durabilityBarColor.get() == -1) return 1;
-        return (float)PotionBundleUtils.getUses(stack) / getMaxUses();
+        return Math.round((float) PotionBundleUtils.getUses(stack) / getMaxUses() * 13f);
     }
 
     @Override
@@ -40,8 +40,13 @@ public abstract class AbstractPotionBundle extends PotionItem {
     }
 
     @Override
-    public int getRGBDurabilityForDisplay(ItemStack stack) {
+    public int getBarColor(ItemStack stack) {
         return Config.CLIENT.durabilityBarColor.get();
+    }
+
+    @Override
+    public boolean isBarVisible(ItemStack stack) {
+        return Config.CLIENT.showDurabilityBar.get();
     }
 
     @Nonnull

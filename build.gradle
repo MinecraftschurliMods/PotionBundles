@@ -15,7 +15,6 @@ buildscript {
 }
 
 plugins {
-    id 'org.ajoberstar.grgit' version '4.1.0'
     id 'maven-publish'
     id 'eclipse'
     id 'idea'
@@ -33,7 +32,7 @@ if (System.getenv('RELEASE_TYPE') != null) {
     status = System.getenv('RELEASE_TYPE')
     switch (status) {
         case 'snapshot':
-            version = "${version}+${grgit.head().abbreviatedId}"
+            version = "${version}-SNAPSHOT"
             break
         case 'alpha':
         case 'beta':
@@ -87,9 +86,11 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${project.mc_version}-${project.forge_version}"
+
+    // TODO commented out until jei releases for 1.18
     // JEI
-    compileOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${project.jei_version}:api")
-    runtimeOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${project.jei_version}")
+    //compileOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${project.jei_version}:api")
+    //runtimeOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${project.jei_version}")
 
 //    implementation fg.deobf("dev.ftb.mods:ftb-library-forge:${project.ftb_library_version}") {
 //        transitive false
@@ -188,8 +189,6 @@ tasks.withType(Jar).configureEach {
                 'Built-On-Java': "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
                 'Built-On': "${project.mc_version}-${project.forge_version}",
                 'Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                'Git-Commit': "${grgit.head().abbreviatedId}",
-                'Git-Branch': "${grgit.branch.current().fullName.split('/').drop(2).join('/')}",
                 'FMLModType': 'MOD'
         ])
     }

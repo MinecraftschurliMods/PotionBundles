@@ -30,12 +30,17 @@ public class Config {
 
     public static class Client {
         public final ForgeConfigSpec.IntValue durabilityBarColor;
+        public final ForgeConfigSpec.BooleanValue showDurabilityBar;
 
         Client(ForgeConfigSpec.Builder builder) {
             durabilityBarColor = builder
                     .comment("What color the damage bar of a potion bundle should have. Set to -1 to not display a damage bar.")
                     .translation("config." + PotionBundles.MODID + ".durabilityBarColor")
                     .defineInRange("durabilityBarColor", 0x0000dd, -1, 0xffffff);
+            showDurabilityBar = builder
+                    .comment("Whether to show the durability bar of the potion bundles.")
+                    .translation("config." + PotionBundles.MODID + ".showDurabilityBar")
+                    .define("showDurabilityBar", false);
         }
 
 //        void createConfigGui(ConfigGroup group) {
