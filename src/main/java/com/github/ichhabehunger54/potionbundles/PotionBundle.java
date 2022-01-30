@@ -40,9 +40,4 @@ public class PotionBundle extends AbstractPotionBundle {
         }
         return PotionBundleUtils.getUses(stack) == 0 ? Config.SERVER.returnString.get() ? PotionBundleUtils.getString(stack) : ItemStack.EMPTY : stack;
     }
-
-    @Override
-    protected boolean isEnabled() {
-        return true;
-    }
 }

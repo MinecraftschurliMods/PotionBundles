@@ -27,9 +27,4 @@ public class LingeringPotionBundle extends AbstractThrowablePotionBundle {
     protected void playThrowSound(@Nonnull Level world, @Nonnull Player player) {
         world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LINGERING_POTION_THROW, SoundSource.NEUTRAL, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
     }
-
-    @Override
-    protected boolean isEnabled() {
-        return Config.SERVER.allowLingeringPotion.get();
-    }
 }

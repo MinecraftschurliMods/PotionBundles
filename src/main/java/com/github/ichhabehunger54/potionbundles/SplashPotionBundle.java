@@ -27,9 +27,4 @@ public class SplashPotionBundle extends AbstractThrowablePotionBundle {
     protected void playThrowSound(final @Nonnull Level world, final @Nonnull Player player) {
         world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SPLASH_POTION_THROW, SoundSource.PLAYERS, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
     }
-
-    @Override
-    protected boolean isEnabled() {
-        return Config.SERVER.allowSplashPotion.get();
-    }
 }

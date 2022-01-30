@@ -17,14 +17,17 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
+import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Objects;
 
 public class PotionBundleRecipe extends CustomRecipe {
-    private @Nonnull final Ingredient string;
-    private @Nonnull final Item potion;
-    private @Nonnull final AbstractPotionBundle bundle;
+    private @Nonnull
+    final Ingredient string;
+    private @Nonnull
+    final Item potion;
+    private @Nonnull
+    final AbstractPotionBundle bundle;
 
     public PotionBundleRecipe(ResourceLocation id, @Nonnull Ingredient string, @Nonnull Item potion, @Nonnull AbstractPotionBundle bundle) {
         super(id);
@@ -44,16 +47,14 @@ public class PotionBundleRecipe extends CustomRecipe {
                 if (string) return false;
                 string = true;
             } else if (is.getItem() == this.potion) {
-                if (this.bundle.isEnabled()) {
-                    if (potions == 0) {
-                        potion = PotionUtils.getPotion(is);
-                        potions++;
-                    } else if (potions > 0) {
-                        if (PotionUtils.getPotion(is) != potion) return false;
-                        potions++;
-                    }
-                    if (potions > this.bundle.getMaxUses()) return false;
-                } else if (!is.isEmpty()) return false;
+                if (potions == 0) {
+                    potion = PotionUtils.getPotion(is);
+                    potions++;
+                } else if (potions > 0) {
+                    if (PotionUtils.getPotion(is) != potion) return false;
+                    potions++;
+                }
+                if (potions > this.bundle.getMaxUses()) return false;
             } else if (!is.isEmpty()) return false;
         }
         return potions == this.bundle.getMaxUses() && string;
@@ -98,11 +99,15 @@ public class PotionBundleRecipe extends CustomRecipe {
         public PotionBundleRecipe fromJson(@Nonnull ResourceLocation rl, @Nonnull JsonObject json) {
             Ingredient string = Ingredient.fromJson(json.get("string"));
             Item potion = ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse(json.get("potion").getAsString()));
-            if (potion == null) throw new JsonParseException("Tried using an invalid item as potion item for recipe "+rl);
+            if (potion == null)
+                throw new JsonParseException("Tried using an invalid item as potion item for recipe " + rl);
             Item bundle = ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse(json.get("bundle").getAsString()));
-            if (bundle == null) throw new JsonParseException("Tried using an invalid item as potion bundle item for recipe "+rl);
-            if (bundle instanceof AbstractPotionBundle bundle1) return new PotionBundleRecipe(rl, string, potion, bundle1);
-            else throw new JsonParseException("The defined PotionBundle is not an instance of AbstractPotionBundle in recipe "+rl);
+            if (bundle == null)
+                throw new JsonParseException("Tried using an invalid item as potion bundle item for recipe " + rl);
+            if (bundle instanceof AbstractPotionBundle bundle1)
+                return new PotionBundleRecipe(rl, string, potion, bundle1);
+            else
+                throw new JsonParseException("The defined PotionBundle is not an instance of AbstractPotionBundle in recipe " + rl);
         }
 
         @Nullable

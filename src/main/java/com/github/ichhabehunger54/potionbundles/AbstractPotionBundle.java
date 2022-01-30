@@ -57,7 +57,7 @@ public abstract class AbstractPotionBundle extends PotionItem {
 
     @Override
     public void fillItemCategory(@Nonnull CreativeModeTab group, @Nonnull NonNullList<ItemStack> items) {
-        if (allowdedIn(group) && (isEnabled() || CreativeModeTab.TAB_SEARCH == group)) {
+        if (allowdedIn(group)) {
             for (Potion potion : ForgeRegistries.POTIONS) {
                 if (potion == Potions.EMPTY) continue;
                 ItemStack stack = createStack(new ItemStack(Items.STRING), potion);
@@ -73,6 +73,4 @@ public abstract class AbstractPotionBundle extends PotionItem {
         PotionBundleUtils.setString(stack, string);
         return stack;
     }
-
-    protected abstract boolean isEnabled();
 }
