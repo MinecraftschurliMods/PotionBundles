@@ -15,10 +15,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-/**
- * @author Minecraftschurli
- * @version 2021-07-26
- */
 public abstract class AbstractPotionBundle extends PotionItem {
     public AbstractPotionBundle() {
         super(new Item.Properties().tab(CreativeModeTab.TAB_BREWING).stacksTo(1));

@@ -12,10 +12,6 @@ import net.minecraft.world.level.Level;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-/**
- * @author Minecraftschurli
- * @version 2021-07-26
- */
 public class LingeringPotionBundle extends AbstractThrowablePotionBundle {
     @Override
     public void appendHoverText(@Nonnull ItemStack stack, Level world, @Nonnull List<Component> tooltip, @Nonnull TooltipFlag flag) {

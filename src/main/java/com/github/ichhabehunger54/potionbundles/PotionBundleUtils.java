@@ -6,10 +6,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 
-/**
- * @author Minecraftschurli
- * @version 2021-07-24
- */
 public final class PotionBundleUtils {
     public static final String USES_KEY = "Uses";
     public static final String STRING_KEY = "String";

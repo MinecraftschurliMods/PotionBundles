@@ -11,10 +11,6 @@ import net.minecraft.world.level.Level;
 
 import javax.annotation.Nonnull;
 
-/**
- * @author Minecraftschurli
- * @version 2021-07-26
- */
 public abstract class AbstractThrowablePotionBundle extends AbstractPotionBundle {
     @Nonnull
     @Override

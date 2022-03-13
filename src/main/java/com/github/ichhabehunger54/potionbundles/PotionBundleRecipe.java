@@ -93,6 +93,10 @@ public class PotionBundleRecipe extends CustomRecipe {
         return this.potion;
     }
 
+    public Ingredient getString() {
+        return string;
+    }
+
     static class Serializer extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<PotionBundleRecipe> {
         @Nonnull
         @Override
