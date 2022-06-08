@@ -1,9 +1,11 @@
 package com.github.ichhabehunger54.potionbundles;
 
 import mezz.jei.api.IModPlugin;
+import mezz.jei.api.constants.RecipeTypes;
+import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.ModIds;
-import mezz.jei.api.constants.VanillaRecipeCategoryUid;
+import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.client.Minecraft;
@@ -39,7 +41,7 @@ public class JEICompat implements IModPlugin {
                 .map(PotionBundleRecipe.class::cast)
                 .flatMap(this::mapRecipes)
                 .toList();
-        registration.addRecipes(recipes, VanillaRecipeCategoryUid.CRAFTING);
+        registration.addRecipes(RecipeTypes.CRAFTING, recipes);
     }
 
     private Stream<CraftingRecipe> mapRecipes(final PotionBundleRecipe recipe) {
@@ -66,8 +68,9 @@ public class JEICompat implements IModPlugin {
 
     @Override
     public void registerItemSubtypes(ISubtypeRegistration r) {
-        r.registerSubtypeInterpreter(PotionBundles.POTION_BUNDLE.get(), (ingredient, context) -> String.valueOf(PotionUtils.getPotion(ingredient).getRegistryName()));
-        r.registerSubtypeInterpreter(PotionBundles.SPLASH_POTION_BUNDLE.get(), (ingredient, context) -> String.valueOf(PotionUtils.getPotion(ingredient).getRegistryName()));
-        r.registerSubtypeInterpreter(PotionBundles.LINGERING_POTION_BUNDLE.get(), (ingredient, context) -> String.valueOf(PotionUtils.getPotion(ingredient).getRegistryName()));
+        IIngredientSubtypeInterpreter<ItemStack> byPotion = (ingredient, context) -> String.valueOf(ForgeRegistries.POTIONS.getKey(PotionUtils.getPotion(ingredient)));
+        r.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, PotionBundles.POTION_BUNDLE.get(), byPotion);
+        r.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, PotionBundles.SPLASH_POTION_BUNDLE.get(), byPotion);
+        r.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, PotionBundles.LINGERING_POTION_BUNDLE.get(), byPotion);
     }
 }

@@ -3,7 +3,6 @@ package com.github.ichhabehunger54.potionbundles;
 import net.minecraft.Util;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
@@ -32,7 +31,7 @@ public abstract class AbstractPotionBundle extends PotionItem {
 
     @Override
     public void appendHoverText(@Nonnull ItemStack stack, @Nullable Level world, @Nonnull List<Component> tooltip, @Nonnull TooltipFlag flag) {
-        tooltip.add(new TranslatableComponent(getDescriptionId() + ".uses", PotionBundleUtils.getUses(stack)));
+        tooltip.add(Component.translatable(getDescriptionId() + ".uses", PotionBundleUtils.getUses(stack)));
     }
 
     @Override
@@ -48,12 +47,12 @@ public abstract class AbstractPotionBundle extends PotionItem {
     @Nonnull
     @Override
     public Component getName(@Nonnull ItemStack stack) {
-        return new TranslatableComponent(getDescriptionId(), new TranslatableComponent(PotionUtils.getPotion(stack).getName(Util.makeDescriptionId("item", Items.POTION.getRegistryName()) + ".effect.")));
+        return Component.translatable(getDescriptionId(), Component.translatable(PotionUtils.getPotion(stack).getName(Util.makeDescriptionId("item", ForgeRegistries.ITEMS.getKey(Items.POTION)) + ".effect.")));
     }
 
     @Override
     public void fillItemCategory(@Nonnull CreativeModeTab group, @Nonnull NonNullList<ItemStack> items) {
-        if (allowdedIn(group)) {
+        if (allowedIn(group)) {
             for (Potion potion : ForgeRegistries.POTIONS) {
                 if (potion == Potions.EMPTY) continue;
                 ItemStack stack = createStack(new ItemStack(Items.STRING), potion);

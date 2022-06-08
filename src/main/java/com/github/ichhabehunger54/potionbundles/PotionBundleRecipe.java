@@ -15,7 +15,6 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 
 import java.util.Objects;
 import javax.annotation.Nonnull;
@@ -97,7 +96,7 @@ public class PotionBundleRecipe extends CustomRecipe {
         return string;
     }
 
-    static class Serializer extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<PotionBundleRecipe> {
+    static class Serializer implements RecipeSerializer<PotionBundleRecipe> {
         @Nonnull
         @Override
         public PotionBundleRecipe fromJson(@Nonnull ResourceLocation rl, @Nonnull JsonObject json) {

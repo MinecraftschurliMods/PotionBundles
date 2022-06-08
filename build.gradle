@@ -76,8 +76,9 @@ dependencies {
     minecraft "net.minecraftforge:forge:${project.mc_version}-${project.forge_version}"
 
     // JEI
-    compileOnly fg.deobf("mezz.jei:jei-1.18:${project.jei_version}:api")
-    runtimeOnly fg.deobf("mezz.jei:jei-1.18:${project.jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-1.18.2-common-api:${project.jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-1.18.2-forge-api:${project.jei_version}")
+    //runtimeOnly fg.deobf("mezz.jei:jei-1.19-forge:${project.jei_version}")
 }
 
 minecraft {
@@ -236,7 +237,7 @@ publishing {
             }
             issueManagement {
                 system = 'github'
-                url = "https://github.com/${project.github}.git/issues"
+                url = "https://github.com/${project.github}/issues"
             }
             organization {
                 name = 'Minecraftschurli Mods'
