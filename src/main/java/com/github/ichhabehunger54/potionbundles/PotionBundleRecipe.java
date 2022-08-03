@@ -21,12 +21,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class PotionBundleRecipe extends CustomRecipe {
-    private @Nonnull
-    final Ingredient string;
-    private @Nonnull
-    final Item potion;
-    private @Nonnull
-    final AbstractPotionBundle bundle;
+    private final Ingredient string;
+    private final Item potion;
+    private final AbstractPotionBundle bundle;
 
     public PotionBundleRecipe(ResourceLocation id, @Nonnull Ingredient string, @Nonnull Item potion, @Nonnull AbstractPotionBundle bundle) {
         super(id);
@@ -92,6 +89,7 @@ public class PotionBundleRecipe extends CustomRecipe {
         return this.potion;
     }
 
+    @Nonnull
     public Ingredient getString() {
         return string;
     }
