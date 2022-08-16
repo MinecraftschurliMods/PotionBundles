@@ -161,7 +161,7 @@ tasks.withType(Jar).configureEach {
         }
     }
     manifest {
-        mainAttributes([
+        attributes([
                 'Maven-Artifact': "${project.mod_group}:${project.archivesBaseName}:${project.version}",
                 'Specification-Title': archivesBaseName,
                 'Specification-Vendor': "${project.vendor}",
