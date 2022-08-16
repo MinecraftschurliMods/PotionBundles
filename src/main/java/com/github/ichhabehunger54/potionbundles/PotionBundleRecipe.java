@@ -68,7 +68,7 @@ public class PotionBundleRecipe extends CustomRecipe {
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack is = inv.getItem(i);
             if (potion == null && is.getItem() == this.potion) potion = PotionUtils.getPotion(is);
-            if (string == null && this.string.test(is)) string = is;
+            if (string == null && this.string.test(is)) string = is.copy().split(1);
             if (potion != null && string != null) return this.bundle.createStack(string, potion);
         }
         return ItemStack.EMPTY;
