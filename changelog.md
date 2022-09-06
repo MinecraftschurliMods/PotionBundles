@@ -1,5 +1,5 @@
-# Version 1.18.1-1.4
+# Version 1.18.1-1.5
 
-## Fixes
+## Additions
 
-- Fix dupe bug for bundle string
+- Added the ability to use potions based on custom effects in bundles.

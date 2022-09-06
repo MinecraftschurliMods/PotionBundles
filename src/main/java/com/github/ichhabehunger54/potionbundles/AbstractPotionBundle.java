@@ -1,9 +1,9 @@
 package com.github.ichhabehunger54.potionbundles;
 
-import net.minecraft.Util;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
@@ -48,7 +48,7 @@ public abstract class AbstractPotionBundle extends PotionItem {
     @Nonnull
     @Override
     public Component getName(@Nonnull ItemStack stack) {
-        return new TranslatableComponent(getDescriptionId(), new TranslatableComponent(PotionUtils.getPotion(stack).getName(Util.makeDescriptionId("item", Items.POTION.getRegistryName()) + ".effect.")));
+        return new TranslatableComponent(getDescriptionId(), Items.POTION.getName(stack));
     }
 
     @Override
@@ -56,15 +56,18 @@ public abstract class AbstractPotionBundle extends PotionItem {
         if (allowdedIn(group)) {
             for (Potion potion : ForgeRegistries.POTIONS) {
                 if (potion == Potions.EMPTY) continue;
-                ItemStack stack = createStack(new ItemStack(Items.STRING), potion);
+                ItemStack stack = createStack(new ItemStack(Items.STRING), potion, List.of(), null);
                 if (!stack.isEmpty()) items.add(stack);
             }
         }
     }
 
     @Nonnull
-    protected ItemStack createStack(@Nonnull ItemStack string, @Nonnull Potion potion) {
-        ItemStack stack = PotionUtils.setPotion(new ItemStack(this), potion);
+    protected ItemStack createStack(@Nonnull ItemStack string, @Nonnull Potion potion, @Nonnull List<MobEffectInstance> customEffects, @Nullable Integer customColor) {
+        ItemStack stack = new ItemStack(this);
+        PotionUtils.setPotion(stack, potion);
+        PotionUtils.setCustomEffects(stack, customEffects);
+        if (customColor != null) stack.getOrCreateTag().putInt("CustomPotionColor", customColor);
         PotionBundleUtils.setUses(stack, getMaxUses());
         PotionBundleUtils.setString(stack, string);
         return stack;
