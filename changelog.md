@@ -1,5 +1,5 @@
-# Version 1.19.1-1.4
+# Version 1.19.1-1.6
 
-## Fixes
+## Additions
 
-- Fix dupe bug for bundle string
+- Added the ability to use potions based on custom effects in bundles.
