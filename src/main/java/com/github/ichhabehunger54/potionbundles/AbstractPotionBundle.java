@@ -1,22 +1,23 @@
 package com.github.ichhabehunger54.potionbundles;
 
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.PotionItem;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 
 public abstract class AbstractPotionBundle extends PotionItem {
     public AbstractPotionBundle() {
-        super(new Item.Properties().tab(CreativeModeTab.TAB_BREWING).stacksTo(1));
+        super(new Item.Properties().stacksTo(1));
     }
 
     protected int getMaxUses() {
@@ -24,45 +25,34 @@ public abstract class AbstractPotionBundle extends PotionItem {
     }
 
     @Override
-    public int getBarWidth(@Nonnull ItemStack stack) {
+    public int getBarWidth(@NotNull ItemStack stack) {
         if (Config.CLIENT.durabilityBarColor.get() == -1) return 1;
         return Math.round((float) PotionBundleUtils.getUses(stack) / getMaxUses() * 13f);
     }
 
     @Override
-    public void appendHoverText(@Nonnull ItemStack stack, @Nullable Level world, @Nonnull List<Component> tooltip, @Nonnull TooltipFlag flag) {
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level world, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag) {
         tooltip.add(Component.translatable(getDescriptionId() + ".uses", PotionBundleUtils.getUses(stack)));
     }
 
     @Override
-    public int getBarColor(@Nonnull ItemStack stack) {
+    public int getBarColor(@NotNull ItemStack stack) {
         return Config.CLIENT.durabilityBarColor.get();
     }
 
     @Override
-    public boolean isBarVisible(@Nonnull ItemStack stack) {
+    public boolean isBarVisible(@NotNull ItemStack stack) {
         return Config.CLIENT.showDurabilityBar.get();
     }
 
-    @Nonnull
+    @NotNull
     @Override
-    public Component getName(@Nonnull ItemStack stack) {
+    public Component getName(@NotNull ItemStack stack) {
         return Component.translatable(getDescriptionId(), Items.POTION.getName(stack));
     }
 
-    @Override
-    public void fillItemCategory(@Nonnull CreativeModeTab group, @Nonnull NonNullList<ItemStack> items) {
-        if (allowedIn(group)) {
-            for (Potion potion : ForgeRegistries.POTIONS) {
-                if (potion == Potions.EMPTY) continue;
-                ItemStack stack = createStack(new ItemStack(Items.STRING), potion, List.of(), null);
-                if (!stack.isEmpty()) items.add(stack);
-            }
-        }
-    }
-
-    @Nonnull
-    protected ItemStack createStack(@Nonnull ItemStack string, @Nonnull Potion potion, @Nonnull List<MobEffectInstance> customEffects, @Nullable Integer customColor) {
+    @NotNull
+    protected ItemStack createStack(@NotNull ItemStack string, @NotNull Potion potion, @NotNull List<MobEffectInstance> customEffects, @Nullable Integer customColor) {
         ItemStack stack = new ItemStack(this);
         PotionUtils.setPotion(stack, potion);
         PotionUtils.setCustomEffects(stack, customEffects);

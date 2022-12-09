@@ -43,7 +43,7 @@ java {
     }
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
@@ -74,9 +74,10 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${project.mc_version}-${project.forge_version}"
-    compileOnly fg.deobf("mezz.jei:jei-${project.mc_version}-common-api:${project.jei_version}")
-    compileOnly fg.deobf("mezz.jei:jei-${project.mc_version}-forge-api:${project.jei_version}")
-    runtimeOnly fg.deobf("mezz.jei:jei-${project.mc_version}-forge:${project.jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-1.19.1-common-api:${project.jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-1.19.1-forge-api:${project.jei_version}")
+    //runtimeOnly fg.deobf("mezz.jei:jei-1.19.1-forge:${project.jei_version}")
+    implementation 'org.jetbrains:annotations:23.0.0'
 }
 
 minecraft {
@@ -185,20 +186,20 @@ reobf {
     jar { classpath.from(sourceSets.main.compileClasspath) }
 }
 
-task reobf {
+tasks.register('reobf') {
     dependsOn reobfJar
 }
 
-task setupGithubActions() {
+tasks.register('setupGithubActions') {
     doLast {
         println "##[set-output name=modid;]${project.mod_id}"
-        if(project.hasProperty('curse_project_id')) {
+        if (project.hasProperty('curse_project_id')) {
             println "##[set-output name=project_id;]${project.curse_project_id}"
-            if(project.hasProperty('curse_title')) {
+            if (project.hasProperty('curse_title')) {
                 println "##[set-output name=curse_title;]${project.curse_title}"
             }
             println "##[set-output name=curse_versions;]${project.curse_versions}"
-            if(project.hasProperty('curse_relations')) {
+            if (project.hasProperty('curse_relations')) {
                 println "##[set-output name=curse_relations;]${project.curse_relations}"
             }
         }
@@ -214,7 +215,7 @@ idea {
     }
 }
 
-tasks.withType(GenerateModuleMetadata) {
+tasks.withType(GenerateModuleMetadata).configureEach {
     enabled = false
 }
 

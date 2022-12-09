@@ -62,7 +62,7 @@ public class JEICompat implements IModPlugin {
                     ItemStack output = PotionUtils.setPotion(new ItemStack(bundleItem), potion);
                     PotionBundleUtils.setUses(output, maxUses);
                     ResourceLocation id = new ResourceLocation(ModIds.MINECRAFT_ID, group + "." + output.getDescriptionId() + "." + potion.getName(""));
-                    return new ShapelessRecipe(id, group, output, inputs);
+                    return new ShapelessRecipe(id, group, CraftingBookCategory.EQUIPMENT, output, inputs);
                 });
     }
 
