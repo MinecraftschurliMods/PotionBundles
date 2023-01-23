@@ -24,7 +24,7 @@ jobs:
           arguments: setupGithubActions build publish
         env:
           MAVEN_URL: ${{ secrets.MAVEN_URL }}
-          MAVEN_USER: ${{ secrets.MAVEN_USER }}
+          MAVEN_USER: ${{ env.MAVEN_USER }}
           MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
           GRADLE_BUILD_ACTION_CACHE_DEBUG_ENABLED: true
       - name: Get Changelog
