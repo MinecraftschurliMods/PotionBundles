@@ -7,52 +7,51 @@ on:
 jobs:
   release:
     if: startsWith(github.ref, 'refs/tags/')
+    strategy:
+      matrix:
+        version: [ 17 ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - name: Set up JDK 17
-        uses: actions/setup-java@v1
+      - uses: actions/checkout@v3
+      - name: Set up JDK ${{ matrix.version }}
+        uses: actions/setup-java@v3
         with:
-          java-version: 17
+          java-version: ${{ matrix.version }}
           distribution: 'adopt'
       - name: Setup Build
         run: chmod 777 gradlew
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
         id: build
-        with:
-          arguments: setupGithubActions build publish
         env:
           MAVEN_URL: ${{ secrets.MAVEN_URL }}
           MAVEN_USER: ${{ env.MAVEN_USER }}
           MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
-          GRADLE_BUILD_ACTION_CACHE_DEBUG_ENABLED: true
-      - name: Get Changelog
-        id: changelog
+          RELEASE_TYPE: release
+        with:
+          arguments: setupGithubActions build publish
+      - name: Upload
+        id: upload
+        uses: Minecraftschurli/mc-publish@master
+        with:
+          java: ${{ matrix.version }}
+          files: build/libs/!(*-@(all|api|deobf|slim|sources|javadoc)).jar
+          github-files-primary: build/libs/!(*-@(all|api|deobf|slim|sources|javadoc)).jar
+          github-files-secondary: build/libs/*-@(all|api|deobf|slim|sources|javadoc).jar
+          changelog-file: changelog.md
+          name: ${{ steps.build.outputs.modid }}-${{ steps.build.outputs.version }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          curseforge-token: ${{ secrets.CF_API_TOKEN }}
+      - name: Read summary
+        id: summary
         uses: juliangruber/read-file-action@v1
         with:
-          path: ./changelog.md
-      - name: Create a Release
-        id: create_release
-        uses: meeDamian/github-release@2.0
-        with:
-          draft: false
-          gzip: false
-          prerelease: false
-          name: ${{ steps.build.outputs.modid }}-${{ steps.build.outputs.version }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          files: >
-            build/libs/${{ steps.build.outputs.modid }}-${{ steps.build.outputs.version }}.jar
-            build/libs/${{ steps.build.outputs.modid }}-${{ steps.build.outputs.version }}-sources.jar
-          body: ${{ steps.changelog.outputs.content }}
-      - name: CF upload
-        uses: itsmeow/curseforge-upload@master
-        with:
-          release_type: release
-          game_endpoint: minecraft
-          token: ${{ secrets.CF_API_TOKEN }}
-          project_id: ${{ steps.build.outputs.project_id }}
-          game_versions: ${{ steps.build.outputs.curse_versions }}
-          file_path: build/libs/${{ steps.build.outputs.modid }}-${{ steps.build.outputs.version }}.jar
-          changelog_type: markdown
-          changelog: ${{ steps.changelog.outputs.content }}
+          path: summary.txt
+    outputs:
+      version: ${{ steps.build.outputs.version }}
+      summary: ${{ steps.summary.outputs.content }}
+      published-to: ${{ steps.upload.outputs.published-to }}
+      github-link: ${{ steps.upload.outputs.github-link }}
+      modrinth-link: ${{ steps.upload.outputs.modrinth-link }}
+      curseforge-link: ${{ steps.upload.outputs.curseforge-link }}

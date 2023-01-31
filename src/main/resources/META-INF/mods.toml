@@ -3,12 +3,15 @@ loaderVersion="${loader_version_range}"
 license="GPLv3"
 
 [[mods]]
-modId="${mod_id}"
-version="${mod_version}"
-displayName="${mod_name}"
-displayURL="${mod_url}"
-authors="${mod_authors}"
-description='''${mod_description}'''
+    modId="${mod_id}"
+    version="${mod_version}"
+    displayName="${mod_name}"
+    displayURL="${mod_url}"
+    authors="${mod_authors}"
+    description='''${mod_description}'''
+    [custom.mc-publish]
+        modrinth = "${modrinth_project_id}"
+        curseforge = ${curse_project_id}
 
 [[dependencies.${mod_id}]]
     modId="forge"
