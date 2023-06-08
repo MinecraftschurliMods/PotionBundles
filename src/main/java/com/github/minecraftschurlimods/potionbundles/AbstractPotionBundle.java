@@ -1,4 +1,4 @@
-package com.github.ichhabehunger54.potionbundles;
+package com.github.minecraftschurlimods.potionbundles;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;

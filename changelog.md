@@ -1,2 +1,2 @@
 # Changes
-- Now works with versions of forge after 44.1
+- Updated to 1.20

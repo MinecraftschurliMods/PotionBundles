@@ -1,4 +1,4 @@
-package com.github.ichhabehunger54.potionbundles;
+package com.github.minecraftschurlimods.potionbundles;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -12,15 +12,15 @@ import net.minecraft.world.level.Level;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-public class LingeringPotionBundle extends AbstractThrowablePotionBundle {
+public class SplashPotionBundle extends AbstractThrowablePotionBundle {
     @Override
     public void appendHoverText(@Nonnull ItemStack stack, Level world, @Nonnull List<Component> tooltip, @Nonnull TooltipFlag flag) {
-        PotionUtils.addPotionTooltip(stack, tooltip, 0.25F);
+        PotionUtils.addPotionTooltip(stack, tooltip, 1F);
         super.appendHoverText(stack, world, tooltip, flag);
     }
 
     @Override
-    protected void playThrowSound(@Nonnull Level world, @Nonnull Player player) {
-        world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LINGERING_POTION_THROW, SoundSource.NEUTRAL, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
+    protected void playThrowSound(final @Nonnull Level world, final @Nonnull Player player) {
+        world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SPLASH_POTION_THROW, SoundSource.PLAYERS, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
     }
 }

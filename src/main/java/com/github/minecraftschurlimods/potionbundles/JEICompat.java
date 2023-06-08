@@ -1,4 +1,4 @@
-package com.github.ichhabehunger54.potionbundles;
+package com.github.minecraftschurlimods.potionbundles;
 
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.constants.RecipeTypes;

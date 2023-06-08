@@ -1,6 +1,7 @@
-package com.github.ichhabehunger54.potionbundles;
+package com.github.minecraftschurlimods.potionbundles;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -10,7 +11,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -46,15 +47,15 @@ public class PotionBundles {
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.serverSpec);
     }
 
-    private static void registerItemsToCreativeTabs(CreativeModeTabEvent.BuildContents event) {
-        if (event.getTab() != CreativeModeTabs.FOOD_AND_DRINKS) return;
+    private static void registerItemsToCreativeTabs(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() != CreativeModeTabs.FOOD_AND_DRINKS) return;
         addBundlesForAllPotions(event, POTION_BUNDLE.get());
         addBundlesForAllPotions(event, SPLASH_POTION_BUNDLE.get());
         addBundlesForAllPotions(event, LINGERING_POTION_BUNDLE.get());
     }
 
-    private static void addBundlesForAllPotions(CreativeModeTabEvent.BuildContents populator, @NotNull AbstractPotionBundle bundle) {
-        ItemStack string = getStringFromRecipe(bundle);
+    private static void addBundlesForAllPotions(BuildCreativeModeTabContentsEvent populator, @NotNull AbstractPotionBundle bundle) {
+        ItemStack string = getStringFromRecipe(bundle, ((RegistryAccess) populator.getParameters().holders()));
         for (Potion potion : ForgeRegistries.POTIONS.getValues()) {
             if (potion == Potions.EMPTY) continue;
             ItemStack stack = bundle.createStack(string, potion, List.of(), null);
@@ -63,14 +64,14 @@ public class PotionBundles {
     }
 
     @Nonnull
-    private static ItemStack getStringFromRecipe(@Nonnull AbstractPotionBundle bundle) {
+    private static ItemStack getStringFromRecipe(@Nonnull AbstractPotionBundle bundle, RegistryAccess registryAccess) {
         RecipeManager recipeManager = DistExecutor.unsafeRunForDist(
                 () -> () -> Minecraft.getInstance().getConnection().getRecipeManager(),
                 () -> () -> ServerLifecycleHooks.getCurrentServer().getRecipeManager()
         );
         for (Recipe<?> recipe : recipeManager.getRecipes()) {
             if (recipe.getSerializer() != POTION_BUNDLE_RECIPE_SERIALIZER.get()) continue;
-            if (recipe.getResultItem().getItem() != bundle) continue;
+            if (recipe.getResultItem(registryAccess).getItem() != bundle) continue;
             PotionBundleRecipe potionBundleRecipe = (PotionBundleRecipe) recipe;
             Ingredient stringIngredient = potionBundleRecipe.getString();
             ItemStack[] stacks = stringIngredient.getItems();
