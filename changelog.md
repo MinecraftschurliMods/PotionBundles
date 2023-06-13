@@ -1,2 +1,2 @@
 # Changes
-- Updated to 1.20
+- Added support for Minecraft 1.20.1
