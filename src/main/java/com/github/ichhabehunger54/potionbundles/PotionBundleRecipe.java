@@ -2,6 +2,7 @@ package com.github.ichhabehunger54.potionbundles;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -69,9 +70,8 @@ public class PotionBundleRecipe extends CustomRecipe {
         return potions == this.bundle.getMaxUses() && string;
     }
 
-    @Nonnull
     @Override
-    public ItemStack assemble(CraftingContainer inv) {
+    public ItemStack assemble(CraftingContainer inv, RegistryAccess access) {
         Potion potion = null;
         List<MobEffectInstance> customEffects = null;
         ItemStack string = null;

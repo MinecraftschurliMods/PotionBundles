@@ -1,6 +1,10 @@
 package com.github.ichhabehunger54.potionbundles;
 
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -64,13 +68,19 @@ public class PotionBundles {
 
     @Nonnull
     private static ItemStack getStringFromRecipe(@Nonnull AbstractPotionBundle bundle) {
-        RecipeManager recipeManager = DistExecutor.unsafeRunForDist(
-                () -> () -> Minecraft.getInstance().getConnection().getRecipeManager(),
-                () -> () -> ServerLifecycleHooks.getCurrentServer().getRecipeManager()
+        Pair<RecipeManager, RegistryAccess> pair = DistExecutor.unsafeRunForDist(
+                () -> () -> {
+                    ClientPacketListener connection = Minecraft.getInstance().getConnection();
+                    return Pair.of(connection.getRecipeManager(), connection.registryAccess());
+                },
+                () -> () -> {
+                    MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+                    return Pair.of(server.getRecipeManager(), server.registryAccess());
+                }
         );
-        for (Recipe<?> recipe : recipeManager.getRecipes()) {
+        for (Recipe<?> recipe : pair.getFirst().getRecipes()) {
             if (recipe.getSerializer() != POTION_BUNDLE_RECIPE_SERIALIZER.get()) continue;
-            if (recipe.getResultItem().getItem() != bundle) continue;
+            if (recipe.getResultItem(pair.getSecond()).getItem() != bundle) continue;
             PotionBundleRecipe potionBundleRecipe = (PotionBundleRecipe) recipe;
             Ingredient stringIngredient = potionBundleRecipe.getString();
             ItemStack[] stacks = stringIngredient.getItems();

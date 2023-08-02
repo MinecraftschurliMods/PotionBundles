@@ -75,8 +75,8 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${project.mc_version}-${project.forge_version}"
-    compileOnly fg.deobf("mezz.jei:jei-1.19.3-common-api:${project.jei_version}")
-    runtimeOnly fg.deobf("mezz.jei:jei-1.19.3-forge:${project.jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-1.19.4-common-api:${project.jei_version}")
+    runtimeOnly fg.deobf("mezz.jei:jei-1.19.4-forge:${project.jei_version}")
     implementation 'org.jetbrains:annotations:23.0.0'
 }
 
