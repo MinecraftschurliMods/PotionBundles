@@ -1,2 +1,2 @@
 # Changes
-- Added support for Minecraft 1.20.1
+- Fixed a rare compatibility issue
