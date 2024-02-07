@@ -1,19 +1,17 @@
 package com.github.minecraftschurlimods.potionbundles;
 
-import net.minecraft.client.Minecraft;
+import com.mojang.logging.LogUtils;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.Potions;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -21,18 +19,17 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-import net.minecraftforge.server.ServerLifecycleHooks;
-import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 @Mod(PotionBundles.MODID)
 public class PotionBundles {
     public static final String MODID = "potionbundles";
     public static final int POTION_BUNDLE_SIZE = 3;
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
-    public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, MODID);
+    static final Logger LOGGER = LogUtils.getLogger();
+    static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
+    static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, MODID);
     public static final RegistryObject<PotionBundle> POTION_BUNDLE = ITEMS.register("potion_bundle", PotionBundle::new);
     public static final RegistryObject<SplashPotionBundle> SPLASH_POTION_BUNDLE = ITEMS.register("splash_potion_bundle", SplashPotionBundle::new);
     public static final RegistryObject<LingeringPotionBundle> LINGERING_POTION_BUNDLE = ITEMS.register("lingering_potion_bundle", LingeringPotionBundle::new);
@@ -49,13 +46,29 @@ public class PotionBundles {
 
     private static void registerItemsToCreativeTabs(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() != CreativeModeTabs.FOOD_AND_DRINKS) return;
-        addBundlesForAllPotions(event, POTION_BUNDLE.get());
-        addBundlesForAllPotions(event, SPLASH_POTION_BUNDLE.get());
-        addBundlesForAllPotions(event, LINGERING_POTION_BUNDLE.get());
+        ItemStack stringBasic;
+        ItemStack stringSplash;
+        ItemStack stringLingering;
+        if (event.getParameters().holders() instanceof RegistryAccess registryAccess) {
+            RecipeManager recipeManager = SidedGetter.getRecipeManager();
+            if (recipeManager != null) {
+                stringBasic = getStringFromRecipe(POTION_BUNDLE.get(), registryAccess, recipeManager);
+                stringSplash = getStringFromRecipe(SPLASH_POTION_BUNDLE.get(), registryAccess, recipeManager);
+                stringLingering = getStringFromRecipe(LINGERING_POTION_BUNDLE.get(), registryAccess, recipeManager);
+            } else {
+                LOGGER.error("No RecipeManager available, can't get correct string for potion bundles.");
+                stringBasic = stringSplash = stringLingering = ItemStack.EMPTY;
+            }
+        } else {
+            LOGGER.error("No RegistryAccess available, can't get correct string for potion bundles.");
+            stringBasic = stringSplash = stringLingering = ItemStack.EMPTY;
+        }
+        addBundlesForAllPotions(event, POTION_BUNDLE.get(), stringBasic);
+        addBundlesForAllPotions(event, SPLASH_POTION_BUNDLE.get(), stringSplash);
+        addBundlesForAllPotions(event, LINGERING_POTION_BUNDLE.get(), stringLingering);
     }
 
-    private static void addBundlesForAllPotions(BuildCreativeModeTabContentsEvent populator, @NotNull AbstractPotionBundle bundle) {
-        ItemStack string = getStringFromRecipe(bundle, ((RegistryAccess) populator.getParameters().holders()));
+    private static void addBundlesForAllPotions(BuildCreativeModeTabContentsEvent populator, AbstractPotionBundle bundle, ItemStack string) {
         for (Potion potion : ForgeRegistries.POTIONS.getValues()) {
             if (potion == Potions.EMPTY) continue;
             ItemStack stack = bundle.createStack(string, potion, List.of(), null);
@@ -63,19 +76,11 @@ public class PotionBundles {
         }
     }
 
-    @Nonnull
-    private static ItemStack getStringFromRecipe(@Nonnull AbstractPotionBundle bundle, RegistryAccess registryAccess) {
-        RecipeManager recipeManager = DistExecutor.unsafeRunForDist(
-                () -> () -> Minecraft.getInstance().getConnection().getRecipeManager(),
-                () -> () -> ServerLifecycleHooks.getCurrentServer().getRecipeManager()
-        );
+    private static ItemStack getStringFromRecipe(AbstractPotionBundle bundle, RegistryAccess registryAccess, RecipeManager recipeManager) {
         for (Recipe<?> recipe : recipeManager.getRecipes()) {
             if (recipe.getSerializer() != POTION_BUNDLE_RECIPE_SERIALIZER.get()) continue;
             if (recipe.getResultItem(registryAccess).getItem() != bundle) continue;
-            PotionBundleRecipe potionBundleRecipe = (PotionBundleRecipe) recipe;
-            Ingredient stringIngredient = potionBundleRecipe.getString();
-            ItemStack[] stacks = stringIngredient.getItems();
-            for (ItemStack stack : stacks) {
+            for (ItemStack stack : ((PotionBundleRecipe) recipe).getString().getItems()) {
                 if (!stack.isEmpty()) {
                     return stack;
                 }

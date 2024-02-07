@@ -10,7 +10,6 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -25,34 +24,32 @@ public abstract class AbstractPotionBundle extends PotionItem {
     }
 
     @Override
-    public int getBarWidth(@NotNull ItemStack stack) {
+    public int getBarWidth(ItemStack stack) {
         if (Config.CLIENT.durabilityBarColor.get() == -1) return 1;
         return Math.round((float) PotionBundleUtils.getUses(stack) / getMaxUses() * 13f);
     }
 
     @Override
-    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level world, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable(getDescriptionId() + ".uses", PotionBundleUtils.getUses(stack)));
     }
 
     @Override
-    public int getBarColor(@NotNull ItemStack stack) {
+    public int getBarColor(ItemStack stack) {
         return Config.CLIENT.durabilityBarColor.get();
     }
 
     @Override
-    public boolean isBarVisible(@NotNull ItemStack stack) {
+    public boolean isBarVisible(ItemStack stack) {
         return Config.CLIENT.showDurabilityBar.get();
     }
 
-    @NotNull
     @Override
-    public Component getName(@NotNull ItemStack stack) {
+    public Component getName(ItemStack stack) {
         return Component.translatable(getDescriptionId(), Items.POTION.getName(stack));
     }
 
-    @NotNull
-    protected ItemStack createStack(@NotNull ItemStack string, @NotNull Potion potion, @NotNull List<MobEffectInstance> customEffects, @Nullable Integer customColor) {
+    protected ItemStack createStack(ItemStack string, Potion potion, List<MobEffectInstance> customEffects, @Nullable Integer customColor) {
         ItemStack stack = new ItemStack(this);
         PotionUtils.setPotion(stack, potion);
         PotionUtils.setCustomEffects(stack, customEffects);

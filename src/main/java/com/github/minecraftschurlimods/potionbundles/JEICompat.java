@@ -18,13 +18,11 @@ import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.crafting.*;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import javax.annotation.Nonnull;
 import java.util.Objects;
 import java.util.stream.Stream;
 
 @JeiPlugin
 public class JEICompat implements IModPlugin {
-    @Nonnull
     @Override
     public ResourceLocation getPluginUid() {
         return new ResourceLocation(PotionBundles.MODID, PotionBundles.MODID);

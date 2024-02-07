@@ -18,7 +18,6 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -29,7 +28,7 @@ public class PotionBundleRecipe extends CustomRecipe {
     private final Item potion;
     private final AbstractPotionBundle bundle;
 
-    public PotionBundleRecipe(ResourceLocation id, @NotNull Ingredient string, @NotNull Item potion, @NotNull AbstractPotionBundle bundle) {
+    public PotionBundleRecipe(ResourceLocation id, Ingredient string, Item potion, AbstractPotionBundle bundle) {
         super(id, CraftingBookCategory.EQUIPMENT);
         this.string = string;
         this.potion = potion;
@@ -37,7 +36,7 @@ public class PotionBundleRecipe extends CustomRecipe {
     }
 
     @Override
-    public boolean matches(CraftingContainer inv, @NotNull Level world) {
+    public boolean matches(CraftingContainer inv, Level world) {
         int potions = 0;
         boolean string = false;
         Potion potion = Potions.EMPTY;
@@ -70,9 +69,8 @@ public class PotionBundleRecipe extends CustomRecipe {
         return potions == this.bundle.getMaxUses() && string;
     }
 
-    @NotNull
     @Override
-    public ItemStack assemble(CraftingContainer inv, @NotNull RegistryAccess registryAccess) {
+    public ItemStack assemble(CraftingContainer inv, RegistryAccess registryAccess) {
         Potion potion = null;
         List<MobEffectInstance> customEffects = null;
         ItemStack string = null;
@@ -95,7 +93,6 @@ public class PotionBundleRecipe extends CustomRecipe {
         return width * height > this.bundle.getMaxUses();
     }
 
-    @NotNull
     @Override
     public RecipeSerializer<?> getSerializer() {
         return PotionBundles.POTION_BUNDLE_RECIPE_SERIALIZER.get();
@@ -109,15 +106,13 @@ public class PotionBundleRecipe extends CustomRecipe {
         return this.potion;
     }
 
-    @NotNull
     public Ingredient getString() {
         return string;
     }
 
     static class Serializer implements RecipeSerializer<PotionBundleRecipe> {
-        @NotNull
         @Override
-        public PotionBundleRecipe fromJson(@NotNull ResourceLocation rl, @NotNull JsonObject json) {
+        public PotionBundleRecipe fromJson(ResourceLocation rl, JsonObject json) {
             Ingredient string = Ingredient.fromJson(json.get("string"));
             Item potion = ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse(json.get("potion").getAsString()));
             if (potion == null)
@@ -133,7 +128,7 @@ public class PotionBundleRecipe extends CustomRecipe {
 
         @Nullable
         @Override
-        public PotionBundleRecipe fromNetwork(@NotNull ResourceLocation rl, @NotNull FriendlyByteBuf buf) {
+        public PotionBundleRecipe fromNetwork(ResourceLocation rl, FriendlyByteBuf buf) {
             Ingredient string = Ingredient.fromNetwork(buf);
             Item potion = ForgeRegistries.ITEMS.getValue(buf.readResourceLocation());
             Item bundle = ForgeRegistries.ITEMS.getValue(buf.readResourceLocation());
@@ -143,7 +138,7 @@ public class PotionBundleRecipe extends CustomRecipe {
         }
 
         @Override
-        public void toNetwork(@NotNull FriendlyByteBuf buf, @NotNull PotionBundleRecipe recipe) {
+        public void toNetwork(FriendlyByteBuf buf, PotionBundleRecipe recipe) {
             recipe.string.toNetwork(buf);
             buf.writeResourceLocation(Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(recipe.potion)));
             buf.writeResourceLocation(Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(recipe.bundle)));

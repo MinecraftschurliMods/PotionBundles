@@ -9,12 +9,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.level.Level;
 
-import javax.annotation.Nonnull;
-
 public abstract class AbstractThrowablePotionBundle extends AbstractPotionBundle {
-    @Nonnull
     @Override
-    public InteractionResultHolder<ItemStack> use(@Nonnull Level world, @Nonnull Player player, @Nonnull InteractionHand hand) {
+    public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
         playThrowSound(world, player);
         if (!world.isClientSide) {
@@ -32,5 +29,5 @@ public abstract class AbstractThrowablePotionBundle extends AbstractPotionBundle
         return InteractionResultHolder.sidedSuccess(itemstack, world.isClientSide());
     }
 
-    protected abstract void playThrowSound(final @Nonnull Level world, final @Nonnull Player player);
+    protected abstract void playThrowSound(Level world, Player player);
 }

@@ -5,6 +5,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 public final class PotionBundleUtils {
     public static final String USES_KEY = "Uses";
@@ -33,6 +34,7 @@ public final class PotionBundleUtils {
         stack.getOrCreateTag().put(STRING_KEY, string.serializeNBT());
     }
 
+    @Nullable
     public static Item getPotionForBundle(Level world, AbstractPotionBundle bundle) {
         return world.getRecipeManager()
                 .getAllRecipesFor(RecipeType.CRAFTING)
