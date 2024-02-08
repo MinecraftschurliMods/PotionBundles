@@ -79,11 +79,14 @@ repositories {
     }
 }
 
+configurations.testImplementation.configure { extendsFrom(configurations.minecraft.get()) }
+
 dependencies {
     minecraft("net.minecraftforge:forge:${mc_version}-${forge_version}")
     compileOnly(fg.deobf("mezz.jei:jei-1.20-common-api:${jei_version}"))
     runtimeOnly(fg.deobf("mezz.jei:jei-1.20-forge:${jei_version}"))
     implementation("org.jetbrains:annotations:23.0.0")
+    testImplementation(sourceSets.main.map { it.output })
 }
 
 minecraft {
@@ -93,23 +96,34 @@ minecraft {
         create("client") {
             workingDirectory(file("run"))
             property("forge.logging.console.level", "debug")
-            mods.register("potionbundles") {
-                source(sourceSets.getByName("main"))
+            mods.register(mod_id) {
+                source(sourceSets.main.get())
             }
         }
         create("server") {
             workingDirectory(file("run"))
             property("forge.logging.console.level", "debug")
-            mods.register("potionbundles") {
-                source(sourceSets.getByName("main"))
+            mods.register(mod_id) {
+                source(sourceSets.main.get())
             }
         }
         create("data") {
             workingDirectory(file("run"))
             property("forge.logging.console.level", "debug")
             args("--mod", mod_id, "--all", "--output", file("src/main/generated/"), "--existing", file("src/main/resources/"))
-            mods.register("potionbundles") {
-                source(sourceSets.getByName("main"))
+            mods.register(mod_id) {
+                source(sourceSets.main.get())
+            }
+        }
+        create("gameTestServer") {
+            workingDirectory(file("run"))
+            singleInstance(true)
+            jvmArg("-ea") // Enable assertions
+            property("forge.logging.markers", "REGISTRIES")
+            property("forge.enabledGameTestNamespaces", mod_id)
+            mods.register(mod_id) {
+                source(sourceSets.main.get())
+                source(sourceSets.test.get())
             }
         }
     }

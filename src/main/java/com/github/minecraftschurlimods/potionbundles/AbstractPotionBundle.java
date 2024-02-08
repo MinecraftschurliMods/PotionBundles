@@ -11,6 +11,7 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.List;
 
@@ -19,7 +20,8 @@ public abstract class AbstractPotionBundle extends PotionItem {
         super(new Item.Properties().stacksTo(1));
     }
 
-    protected int getMaxUses() {
+    @VisibleForTesting
+    public int getMaxUses() {
         return PotionBundles.POTION_BUNDLE_SIZE;
     }
 
@@ -49,7 +51,8 @@ public abstract class AbstractPotionBundle extends PotionItem {
         return Component.translatable(getDescriptionId(), Items.POTION.getName(stack));
     }
 
-    protected ItemStack createStack(ItemStack string, Potion potion, List<MobEffectInstance> customEffects, @Nullable Integer customColor) {
+    @VisibleForTesting
+    public ItemStack createStack(ItemStack string, Potion potion, List<MobEffectInstance> customEffects, @Nullable Integer customColor) {
         ItemStack stack = new ItemStack(this);
         PotionUtils.setPotion(stack, potion);
         PotionUtils.setCustomEffects(stack, customEffects);
