@@ -1,28 +1,28 @@
 package com.github.minecraftschurlimods.potionbundles;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class Config {
-    static final ForgeConfigSpec clientSpec;
+    static final ModConfigSpec clientSpec;
     public static final Config.Client CLIENT;
-    static final ForgeConfigSpec serverSpec;
+    static final ModConfigSpec serverSpec;
     public static final Config.Server SERVER;
 
     static {
-        Pair<Config.Client, ForgeConfigSpec> clientPair = new ForgeConfigSpec.Builder().configure(Config.Client::new);
+        Pair<Config.Client, ModConfigSpec> clientPair = new ModConfigSpec.Builder().configure(Config.Client::new);
         clientSpec = clientPair.getRight();
         CLIENT = clientPair.getLeft();
-        Pair<Config.Server, ForgeConfigSpec> serverPair = new ForgeConfigSpec.Builder().configure(Config.Server::new);
+        Pair<Config.Server, ModConfigSpec> serverPair = new ModConfigSpec.Builder().configure(Config.Server::new);
         serverSpec = serverPair.getRight();
         SERVER = serverPair.getLeft();
     }
 
     public static class Client {
-        public final ForgeConfigSpec.IntValue durabilityBarColor;
-        public final ForgeConfigSpec.BooleanValue showDurabilityBar;
+        public final ModConfigSpec.IntValue durabilityBarColor;
+        public final ModConfigSpec.BooleanValue showDurabilityBar;
 
-        Client(ForgeConfigSpec.Builder builder) {
+        Client(ModConfigSpec.Builder builder) {
             durabilityBarColor = builder
                     .comment("What color the damage bar of a potion bundle should have. Set to -1 to not display a damage bar.")
                     .translation("config." + PotionBundles.MODID + ".durabilityBarColor")
@@ -35,9 +35,9 @@ public class Config {
     }
 
     public static class Server {
-        public final ForgeConfigSpec.BooleanValue returnString;
+        public final ModConfigSpec.BooleanValue returnString;
 
-        Server(ForgeConfigSpec.Builder builder) {
+        Server(ModConfigSpec.Builder builder) {
             returnString = builder
                     .comment("Whether to return the string upon finishing the bundle or not.")
                     .translation("config." + PotionBundles.MODID + ".returnString")

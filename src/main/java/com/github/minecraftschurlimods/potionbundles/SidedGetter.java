@@ -2,8 +2,8 @@ package com.github.minecraftschurlimods.potionbundles;
 
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
 
 public class SidedGetter {

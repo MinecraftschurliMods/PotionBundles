@@ -12,7 +12,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.List;
 public class PotionBundle extends AbstractPotionBundle {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
-        PotionUtils.addPotionTooltip(stack, tooltip, 1.0F);
+        PotionUtils.addPotionTooltip(stack, tooltip, 1.0F, world == null ? 20.0F : world.tickRateManager().tickrate());
         super.appendHoverText(stack, world, tooltip, flag);
     }
 

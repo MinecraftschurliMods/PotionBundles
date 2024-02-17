@@ -15,7 +15,7 @@ import java.util.List;
 public class SplashPotionBundle extends AbstractThrowablePotionBundle {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
-        PotionUtils.addPotionTooltip(stack, tooltip, 1F);
+        PotionUtils.addPotionTooltip(stack, tooltip, 1F, world == null ? 20.0F : world.tickRateManager().tickrate());
         super.appendHoverText(stack, world, tooltip, flag);
     }
 
