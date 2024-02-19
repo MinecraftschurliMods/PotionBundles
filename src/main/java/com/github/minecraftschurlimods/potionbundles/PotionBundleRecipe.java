@@ -1,10 +1,11 @@
 package com.github.minecraftschurlimods.potionbundles;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.Item;
@@ -17,19 +18,23 @@ import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.function.Function;
 
 public class PotionBundleRecipe extends CustomRecipe {
+    private static final Codec<PotionBundleRecipe> CODEC = RecordCodecBuilder.create(inst -> inst.group(
+            Ingredient.CODEC_NONEMPTY.fieldOf("string").forGetter(PotionBundleRecipe::getString),
+            BuiltInRegistries.ITEM.byNameCodec().fieldOf("potion").forGetter(PotionBundleRecipe::getPotionItem),
+            BuiltInRegistries.ITEM.byNameCodec().comapFlatMap(bundle -> bundle instanceof AbstractPotionBundle bundle1 ? DataResult.success(bundle1) : DataResult.error(() -> "The defined PotionBundle is not an instance of AbstractPotionBundle"), Function.identity()).fieldOf("bundle").forGetter(PotionBundleRecipe::getBundleItem)
+    ).apply(inst, PotionBundleRecipe::new));
+
     private final Ingredient string;
     private final Item potion;
     private final AbstractPotionBundle bundle;
 
-    public PotionBundleRecipe(ResourceLocation id, Ingredient string, Item potion, AbstractPotionBundle bundle) {
-        super(id, CraftingBookCategory.EQUIPMENT);
+    public PotionBundleRecipe(Ingredient string, Item potion, AbstractPotionBundle bundle) {
+        super(CraftingBookCategory.EQUIPMENT);
         this.string = string;
         this.potion = potion;
         this.bundle = bundle;
@@ -112,36 +117,24 @@ public class PotionBundleRecipe extends CustomRecipe {
 
     static class Serializer implements RecipeSerializer<PotionBundleRecipe> {
         @Override
-        public PotionBundleRecipe fromJson(ResourceLocation rl, JsonObject json) {
-            Ingredient string = Ingredient.fromJson(json.get("string"));
-            Item potion = ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse(json.get("potion").getAsString()));
-            if (potion == null)
-                throw new JsonParseException("Tried using an invalid item as potion item for recipe " + rl);
-            Item bundle = ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse(json.get("bundle").getAsString()));
-            if (bundle == null)
-                throw new JsonParseException("Tried using an invalid item as potion bundle item for recipe " + rl);
-            if (bundle instanceof AbstractPotionBundle bundle1)
-                return new PotionBundleRecipe(rl, string, potion, bundle1);
-            else
-                throw new JsonParseException("The defined PotionBundle is not an instance of AbstractPotionBundle in recipe " + rl);
+        public Codec<PotionBundleRecipe> codec() {
+            return CODEC;
         }
 
-        @Nullable
         @Override
-        public PotionBundleRecipe fromNetwork(ResourceLocation rl, FriendlyByteBuf buf) {
+        public PotionBundleRecipe fromNetwork(FriendlyByteBuf buf) {
             Ingredient string = Ingredient.fromNetwork(buf);
-            Item potion = ForgeRegistries.ITEMS.getValue(buf.readResourceLocation());
-            Item bundle = ForgeRegistries.ITEMS.getValue(buf.readResourceLocation());
-            assert potion != null;
+            Item potion = BuiltInRegistries.ITEM.get(buf.readResourceLocation());
+            Item bundle = BuiltInRegistries.ITEM.get(buf.readResourceLocation());
             assert bundle instanceof AbstractPotionBundle;
-            return new PotionBundleRecipe(rl, string, potion, (AbstractPotionBundle) bundle);
+            return new PotionBundleRecipe(string, potion, (AbstractPotionBundle) bundle);
         }
 
         @Override
         public void toNetwork(FriendlyByteBuf buf, PotionBundleRecipe recipe) {
             recipe.string.toNetwork(buf);
-            buf.writeResourceLocation(Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(recipe.potion)));
-            buf.writeResourceLocation(Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(recipe.bundle)));
+            buf.writeResourceLocation(BuiltInRegistries.ITEM.getKey(recipe.potion));
+            buf.writeResourceLocation(BuiltInRegistries.ITEM.getKey(recipe.bundle));
         }
     }
 }

@@ -1,8 +1,10 @@
 package com.github.minecraftschurlimods.potionbundles;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +33,7 @@ public final class PotionBundleUtils {
     }
 
     public static void setString(ItemStack stack, ItemStack string) {
-        stack.getOrCreateTag().put(STRING_KEY, string.serializeNBT());
+        stack.getOrCreateTag().put(STRING_KEY, string.save(new CompoundTag()));
     }
 
     @Nullable
@@ -39,6 +41,7 @@ public final class PotionBundleUtils {
         return world.getRecipeManager()
                 .getAllRecipesFor(RecipeType.CRAFTING)
                 .stream()
+                .map(RecipeHolder::value)
                 .filter(recipe -> recipe.getSerializer() == PotionBundles.POTION_BUNDLE_RECIPE_SERIALIZER.get())
                 .filter(PotionBundleRecipe.class::isInstance)
                 .map(PotionBundleRecipe.class::cast)
