@@ -3,8 +3,6 @@ plugins {
     id ("com.github.minecraftschurlimods.helperplugin")
 }
 
-helper.withTestSourceSet()
-
 repositories {
     maven {
         name = "blamejared Maven"
@@ -23,6 +21,7 @@ dependencies {
     implementation("org.jetbrains:annotations:23.0.0")
 }
 
+helper.withTestSourceSet()
 helper.withCommonRuns()
 helper.withGameTestRuns()
 helper.modproperties.put(
