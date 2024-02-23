@@ -19,6 +19,7 @@ dependencies {
     compileOnly("mezz.jei:jei-1.20.4-common-api:${project.properties["jei_version"]}")
     runtimeOnly("mezz.jei:jei-1.20.4-neoforge:${project.properties["jei_version"]}")
     implementation("org.jetbrains:annotations:23.0.0")
+    "testCompileOnly"("org.jetbrains:annotations:23.0.0")
 }
 
 helper.withTestSourceSet()
@@ -27,11 +28,7 @@ helper.withGameTestRuns()
 helper.modproperties.put(
     "catalogueItemIcon", helper.projectId.map { "$it:potion_bundle{Potion:\"minecraft:water\"}" }
 )
-helper.dependency(
-    "jei",
-    project.properties["jei_version_range"] as String,
-    "optional"
-)
+helper.dependencies.jei()
 
 helper.publication.pom {
     organization {
@@ -43,8 +40,9 @@ helper.publication.pom {
             id = "minecraftschurli"
             name = "Minecraftschurli"
             email = "minecraftschurli@gmail.com"
+            url = "https://github.com/Minecraftschurli"
             organization = "Minecraftschurli Mods"
-            organizationUrl = "https://github.com/Minecraftschurli"
+            organizationUrl = "https://github.com/MinecraftschurliMods"
             timezone = "Europe/Vienna"
         }
         developer {
