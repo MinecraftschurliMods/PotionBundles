@@ -16,8 +16,8 @@ repositories {
 
 dependencies {
     implementation(helper.neoforge())
-    compileOnly("mezz.jei:jei-1.20.4-common-api:${project.properties["jei_version"]}")
-    runtimeOnly("mezz.jei:jei-1.20.4-neoforge:${project.properties["jei_version"]}")
+    compileOnly("mezz.jei:jei-1.20.4-common-api:${project.properties["dependency.jei.version"]}")
+    runtimeOnly("mezz.jei:jei-1.20.4-neoforge:${project.properties["dependency.jei.version"]}")
     implementation("org.jetbrains:annotations:23.0.0")
     "testCompileOnly"("org.jetbrains:annotations:23.0.0")
 }
