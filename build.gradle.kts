@@ -1,7 +1,12 @@
+import com.github.minecraftschurlimods.helperplugin.version
+
 plugins {
     idea
+    id("net.neoforged.gradle.userdev")
     id ("com.github.minecraftschurlimods.helperplugin")
 }
+
+helper.withTestSourceSet()
 
 repositories {
     maven {
@@ -14,21 +19,23 @@ repositories {
     }
 }
 
+val jei = helper.dependencies.jei()
+
 dependencies {
     implementation(helper.neoforge())
-    compileOnly("mezz.jei:jei-1.20.4-common-api:${project.properties["dependency.jei.version"]}")
-    runtimeOnly("mezz.jei:jei-1.20.4-neoforge:${project.properties["dependency.jei.version"]}")
+    val jeiApiDep = helper.minecraftVersion.zip(jei.version) { mc, version -> "mezz.jei:jei-${mc}-common-api:${version}" }
+    val jeiDep = helper.minecraftVersion.zip(jei.version) { mc, version -> "mezz.jei:jei-${mc}-neoforge:${version}" }
+    compileOnly(jeiApiDep)
+    runtimeOnly(jeiDep)
     implementation("org.jetbrains:annotations:23.0.0")
     "testCompileOnly"("org.jetbrains:annotations:23.0.0")
 }
 
-helper.withTestSourceSet()
 helper.withCommonRuns()
 helper.withGameTestRuns()
 helper.modproperties.put(
-    "catalogueItemIcon", helper.projectId.map { "$it:potion_bundle{Potion:\"minecraft:water\"}" }
+    "catalogueItemIcon", helper.projectId.map { "$it:potion_bundle[minecraft:potion_contents=\"minecraft:water\"]" }
 )
-helper.dependencies.jei()
 
 helper.publication.pom {
     organization {

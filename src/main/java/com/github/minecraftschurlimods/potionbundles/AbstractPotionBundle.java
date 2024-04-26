@@ -1,23 +1,31 @@
 package com.github.minecraftschurlimods.potionbundles;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.item.alchemy.PotionContents;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.List;
+import java.util.Optional;
 
 public abstract class AbstractPotionBundle extends PotionItem {
     public AbstractPotionBundle() {
         super(new Item.Properties().stacksTo(1));
+    }
+
+    @Override
+    public ItemStack getDefaultInstance() {
+        ItemStack itemstack = super.getDefaultInstance();
+        itemstack.set(PotionBundles.USES, getMaxUses());
+        return itemstack;
     }
 
     @VisibleForTesting
@@ -32,7 +40,7 @@ public abstract class AbstractPotionBundle extends PotionItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable(getDescriptionId() + ".uses", PotionBundleUtils.getUses(stack)));
     }
 
@@ -48,15 +56,18 @@ public abstract class AbstractPotionBundle extends PotionItem {
 
     @Override
     public Component getName(ItemStack stack) {
-        return Component.translatable(getDescriptionId(), Items.POTION.getName(stack));
+        return Component.translatable(getDescriptionId(), PotionBundleUtils.getPotionForBundle(this).getName(stack));
     }
 
     @VisibleForTesting
-    public ItemStack createStack(ItemStack string, Potion potion, List<MobEffectInstance> customEffects, @Nullable Integer customColor) {
+    public ItemStack createStack(@Nullable PotionBundleString string, Holder<Potion> potion, List<MobEffectInstance> customEffects, @Nullable Integer customColor) {
+        return createStack(string, new PotionContents(Optional.of(potion), Optional.ofNullable(customColor), customEffects));
+    }
+
+    @VisibleForTesting
+    public ItemStack createStack(@Nullable PotionBundleString string, PotionContents potionContents) {
         ItemStack stack = new ItemStack(this);
-        PotionUtils.setPotion(stack, potion);
-        PotionUtils.setCustomEffects(stack, customEffects);
-        if (customColor != null) stack.getOrCreateTag().putInt("CustomPotionColor", customColor);
+        stack.set(DataComponents.POTION_CONTENTS, potionContents);
         PotionBundleUtils.setUses(stack, getMaxUses());
         PotionBundleUtils.setString(stack, string);
         return stack;

@@ -1,33 +1,43 @@
 package com.github.minecraftschurlimods.potionbundles;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 
-import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class PotionBundleRecipe extends CustomRecipe {
-    private static final Codec<PotionBundleRecipe> CODEC = RecordCodecBuilder.create(inst -> inst.group(
+    private static final MapCodec<PotionBundleRecipe> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             Ingredient.CODEC_NONEMPTY.fieldOf("string").forGetter(PotionBundleRecipe::getString),
             BuiltInRegistries.ITEM.byNameCodec().fieldOf("potion").forGetter(PotionBundleRecipe::getPotionItem),
             BuiltInRegistries.ITEM.byNameCodec().comapFlatMap(bundle -> bundle instanceof AbstractPotionBundle bundle1 ? DataResult.success(bundle1) : DataResult.error(() -> "The defined PotionBundle is not an instance of AbstractPotionBundle"), Function.identity()).fieldOf("bundle").forGetter(PotionBundleRecipe::getBundleItem)
     ).apply(inst, PotionBundleRecipe::new));
+    private static final StreamCodec<RegistryFriendlyByteBuf, PotionBundleRecipe> STREAM_CODEC = StreamCodec.composite(
+            Ingredient.CONTENTS_STREAM_CODEC,
+            PotionBundleRecipe::getString,
+            ByteBufCodecs.registry(Registries.ITEM),
+            PotionBundleRecipe::getPotionItem,
+            ByteBufCodecs.registry(Registries.ITEM).map(AbstractPotionBundle.class::cast, Function.identity()),
+            PotionBundleRecipe::getBundleItem,
+            PotionBundleRecipe::new
+    );
 
     private final Ingredient string;
     private final Item potion;
@@ -44,9 +54,7 @@ public class PotionBundleRecipe extends CustomRecipe {
     public boolean matches(CraftingContainer inv, Level world) {
         int potions = 0;
         boolean string = false;
-        Potion potion = Potions.EMPTY;
-        List<MobEffectInstance> customEffects = null;
-        int color = 0;
+        PotionContents potionContents = null;
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack is = inv.getItem(i);
             if (this.string.test(is)) {
@@ -56,14 +64,12 @@ public class PotionBundleRecipe extends CustomRecipe {
             }
             if (is.getItem() == this.potion) {
                 if (potions == 0) {
-                    color = PotionUtils.getColor(is);
-                    potion = PotionUtils.getPotion(is);
-                    customEffects = PotionUtils.getCustomEffects(is);
+                    potionContents = is.get(DataComponents.POTION_CONTENTS);
                     potions++;
                 } else if (potions > 0) {
-                    if (PotionUtils.getColor(is) != color) return false;
-                    if (PotionUtils.getPotion(is) != potion) return false;
-                    if (!PotionUtils.getCustomEffects(is).equals(customEffects)) return false;
+                    if (!Objects.equals(potionContents, is.get(DataComponents.POTION_CONTENTS))) {
+                        return false;
+                    }
                     potions++;
                 }
                 if (potions > this.bundle.getMaxUses()) return false;
@@ -75,20 +81,18 @@ public class PotionBundleRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer inv, RegistryAccess registryAccess) {
-        Potion potion = null;
-        List<MobEffectInstance> customEffects = null;
-        ItemStack string = null;
-        Integer customColor = null;
+    public ItemStack assemble(CraftingContainer inv, HolderLookup.Provider provider) {
+        PotionBundleString string = null;
+        PotionContents potionContents = null;
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack is = inv.getItem(i);
-            if (potion == null && is.is(this.potion)) {
-                potion = PotionUtils.getPotion(is);
-                customEffects = PotionUtils.getCustomEffects(is);
-                if (is.getOrCreateTag().contains("CustomPotionColor", 99)) customColor = PotionUtils.getColor(is);
+            if (potionContents == null && is.is(this.potion)) {
+                potionContents = is.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
             }
-            if (string == null && this.string.test(is)) string = is.copy().split(1);
-            if (potion != null && string != null) return this.bundle.createStack(string, potion, customEffects, customColor);
+            if (string == null && this.string.test(is)) {
+                string = PotionBundleString.fromItemStack(is);
+            }
+            if (potionContents != null && string != null) return this.bundle.createStack(string, potionContents);
         }
         return ItemStack.EMPTY;
     }
@@ -117,24 +121,13 @@ public class PotionBundleRecipe extends CustomRecipe {
 
     static class Serializer implements RecipeSerializer<PotionBundleRecipe> {
         @Override
-        public Codec<PotionBundleRecipe> codec() {
+        public MapCodec<PotionBundleRecipe> codec() {
             return CODEC;
         }
 
         @Override
-        public PotionBundleRecipe fromNetwork(FriendlyByteBuf buf) {
-            Ingredient string = Ingredient.fromNetwork(buf);
-            Item potion = BuiltInRegistries.ITEM.get(buf.readResourceLocation());
-            Item bundle = BuiltInRegistries.ITEM.get(buf.readResourceLocation());
-            assert bundle instanceof AbstractPotionBundle;
-            return new PotionBundleRecipe(string, potion, (AbstractPotionBundle) bundle);
-        }
-
-        @Override
-        public void toNetwork(FriendlyByteBuf buf, PotionBundleRecipe recipe) {
-            recipe.string.toNetwork(buf);
-            buf.writeResourceLocation(BuiltInRegistries.ITEM.getKey(recipe.potion));
-            buf.writeResourceLocation(BuiltInRegistries.ITEM.getKey(recipe.bundle));
+        public StreamCodec<RegistryFriendlyByteBuf, PotionBundleRecipe> streamCodec() {
+            return STREAM_CODEC;
         }
     }
 }

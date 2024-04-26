@@ -1,2 +1,1 @@
-# Changes
-- Fixed a rare compatibility issue
+# Updated to 1.20.6

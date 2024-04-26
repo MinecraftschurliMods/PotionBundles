@@ -2,6 +2,7 @@ package com.github.minecraftschurlimods.potionbundles.test;
 
 import com.github.minecraftschurlimods.potionbundles.*;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -15,14 +16,16 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @PrefixGameTestTemplate(false)
@@ -30,7 +33,7 @@ import java.util.List;
 public class PotionBundleTest {
     @GameTest(template = "empty_3x3")
     public static void testPotionBundle(GameTestHelper helper) {
-        ItemStack string = new ItemStack(Items.STRING);
+        PotionBundleString string = PotionBundleString.fromItem(Items.STRING);
         PotionBundle potionBundle = PotionBundles.POTION_BUNDLE.get();
         int maxUses = potionBundle.getMaxUses();
         MobEffectInstance customEffect = new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20);
@@ -68,7 +71,7 @@ public class PotionBundleTest {
     }
 
     private static void testThrownPotionBundle(GameTestHelper helper, AbstractThrowablePotionBundle potionBundle) {
-        ItemStack string = new ItemStack(Items.STRING);
+        PotionBundleString string = PotionBundleString.fromItem(Items.STRING);
         MobEffectInstance customEffect = new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20);
         int maxUses = potionBundle.getMaxUses();
         ItemStack bundle = potionBundle.createStack(string, Potions.WATER, List.of(customEffect), null);
@@ -87,10 +90,12 @@ public class PotionBundleTest {
                         if (potions.size() > 1) {
                             fail("Threw too many potions");
                         }
-                        ThrownPotion thrownPotion = potions.get(0);
+                        ThrownPotion thrownPotion = potions.getFirst();
                         ItemStack thrownPotionItem = thrownPotion.getItem();
-                        List<MobEffectInstance> mobEffects = PotionUtils.getMobEffects(thrownPotionItem);
-                        if (mobEffects.size() != 1 || !mobEffects.get(0).equals(customEffect)) {
+                        PotionContents potionContents = thrownPotionItem.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+                        List<MobEffectInstance> mobEffects = new ArrayList<>();
+                        potionContents.forEachEffect(mobEffects::add);
+                        if (mobEffects.size() != 1 || !mobEffects.getFirst().equals(customEffect)) {
                             fail("Wrong potion thrown");
                         }
                         if (potionBundle == PotionBundles.SPLASH_POTION_BUNDLE.get()) {
@@ -109,11 +114,11 @@ public class PotionBundleTest {
         sequence.thenSucceed();
     }
 
-    private static void assertBundleUsed(Player player, int index, int maxUses, ItemStack string, ItemStack bundle) {
+    private static void assertBundleUsed(Player player, int index, int maxUses, PotionBundleString string, ItemStack bundle) {
         ItemStack inHand = player.getItemInHand(InteractionHand.MAIN_HAND);
         assertNotEmpty(inHand, "Bundle should not be empty");
         if (index == maxUses) {
-            assertSameItem(inHand, string, "Bundle should be empty and returned the string");
+            assertSameItem(inHand, string.toItemStack(), "Bundle should be empty and returned the string");
         } else {
             assertSameItem(inHand, bundle, "Wrong item in hand");
             assertUses(inHand, maxUses - index, "Uses not decremented");
@@ -151,7 +156,7 @@ public class PotionBundleTest {
     }
 
     private static @NotNull Player setupPlayer(GameTestHelper helper, ItemStack bundle) {
-        Player player = helper.makeMockSurvivalPlayer();
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         player.setPos(helper.absoluteVec(Vec3.ZERO));
         helper.getLevel().addFreshEntity(player);
         player.setItemInHand(InteractionHand.MAIN_HAND, bundle);

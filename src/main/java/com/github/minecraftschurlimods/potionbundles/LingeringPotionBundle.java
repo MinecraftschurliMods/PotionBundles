@@ -1,22 +1,22 @@
 package com.github.minecraftschurlimods.potionbundles;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class LingeringPotionBundle extends AbstractThrowablePotionBundle {
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
-        PotionUtils.addPotionTooltip(stack, tooltip, 0.25F, world == null ? 20.0F : world.tickRateManager().tickrate());
-        super.appendHoverText(stack, world, tooltip, flag);
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).addPotionTooltip(tooltip::add, 0.25F, context.tickRate());
+        super.appendHoverText(stack, context, tooltip, flag);
     }
 
     @Override

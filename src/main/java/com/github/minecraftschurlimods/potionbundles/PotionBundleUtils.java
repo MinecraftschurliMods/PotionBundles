@@ -1,26 +1,30 @@
 package com.github.minecraftschurlimods.potionbundles;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.level.Level;
+import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.Nullable;
 
-public final class PotionBundleUtils {
-    public static final String USES_KEY = "Uses";
-    public static final String STRING_KEY = "String";
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
-    private PotionBundleUtils() {}
+public final class PotionBundleUtils {
+    private static final Map<AbstractPotionBundle, Item> POTION_FOR_BUNDLE_CACHE = new HashMap<>();
+
+    private PotionBundleUtils() {
+        throw new NotImplementedException("You can't instantiate a utility class");
+    }
 
     public static int getUses(ItemStack stack) {
-        return stack.getOrCreateTag().getInt(USES_KEY);
+        return stack.getOrDefault(PotionBundles.USES, 0);
     }
 
     public static void setUses(ItemStack stack, int uses) {
-        stack.getOrCreateTag().putInt(USES_KEY, uses);
+        stack.set(PotionBundles.USES, uses);
     }
 
     public static void decrementUses(ItemStack stack) {
@@ -28,26 +32,29 @@ public final class PotionBundleUtils {
     }
 
     public static ItemStack getString(ItemStack stack) {
-        ItemStack s = ItemStack.of(stack.getOrCreateTag().getCompound(STRING_KEY));
-        return s.isEmpty() ? new ItemStack(Items.STRING) : s;
+        PotionBundleString string = stack.get(PotionBundles.STRING);
+        return string == null ? new ItemStack(Items.STRING) : string.toItemStack();
     }
 
-    public static void setString(ItemStack stack, ItemStack string) {
-        stack.getOrCreateTag().put(STRING_KEY, string.save(new CompoundTag()));
+    public static void setString(ItemStack stack, @Nullable PotionBundleString string) {
+        stack.set(PotionBundles.STRING, string);
     }
 
-    @Nullable
-    public static Item getPotionForBundle(Level world, AbstractPotionBundle bundle) {
-        return world.getRecipeManager()
+    static void onReload() {
+        POTION_FOR_BUNDLE_CACHE.clear();
+    }
+
+    public static Item getPotionForBundle(AbstractPotionBundle bundle) {
+        return POTION_FOR_BUNDLE_CACHE.computeIfAbsent(bundle, b -> Optional.ofNullable(SidedGetter.getRecipeManager()).flatMap(recipeManager -> recipeManager
                 .getAllRecipesFor(RecipeType.CRAFTING)
                 .stream()
                 .map(RecipeHolder::value)
                 .filter(recipe -> recipe.getSerializer() == PotionBundles.POTION_BUNDLE_RECIPE_SERIALIZER.get())
                 .filter(PotionBundleRecipe.class::isInstance)
                 .map(PotionBundleRecipe.class::cast)
-                .filter(recipe -> recipe.getBundleItem() == bundle)
+                .filter(recipe -> recipe.getBundleItem() == b)
                 .findFirst()
-                .map(PotionBundleRecipe::getPotionItem)
-                .orElse(null);
+                .map(PotionBundleRecipe::getPotionItem))
+                .orElse(Items.POTION));
     }
 }

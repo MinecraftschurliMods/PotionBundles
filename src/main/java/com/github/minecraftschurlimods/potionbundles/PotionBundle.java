@@ -1,42 +1,63 @@
 package com.github.minecraftschurlimods.potionbundles;
 
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class PotionBundle extends AbstractPotionBundle {
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
-        PotionUtils.addPotionTooltip(stack, tooltip, 1.0F, world == null ? 20.0F : world.tickRateManager().tickrate());
-        super.appendHoverText(stack, world, tooltip, flag);
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).addPotionTooltip(tooltip::add, 1.0F, context.tickRate());
+        super.appendHoverText(stack, context, tooltip, flag);
     }
 
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity entity) {
         Player player = entity instanceof Player ? (Player) entity : null;
         if (player instanceof ServerPlayer) CriteriaTriggers.CONSUME_ITEM.trigger((ServerPlayer) player, stack);
-        if (!world.isClientSide) for (MobEffectInstance effect : PotionUtils.getMobEffects(stack)) {
-            if (effect.getEffect().isInstantenous()) effect.getEffect().applyInstantenousEffect(player, player, entity, effect.getAmplifier(), 1);
-            else entity.addEffect(new MobEffectInstance(effect));
+        if (!world.isClientSide) {
+            PotionContents potioncontents = stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+            potioncontents.forEachEffect(effectInstance -> {
+                if (effectInstance.getEffect().value().isInstantenous()) {
+                    effectInstance.getEffect().value().applyInstantenousEffect(player, player, entity, effectInstance.getAmplifier(), 1.0);
+                } else {
+                    entity.addEffect(effectInstance);
+                }
+            });
         }
-        PotionBundleUtils.decrementUses(stack);
-        if (player != null) {
-            player.awardStat(Stats.ITEM_USED.get(this));
-            ItemHandlerHelper.giveItemToPlayer(player, new ItemStack(Items.GLASS_BOTTLE));
+
+        if (player == null || !player.hasInfiniteMaterials()) {
+            PotionBundleUtils.decrementUses(stack);
+
+            if (player != null) {
+                player.awardStat(Stats.ITEM_USED.get(this));
+                ItemHandlerHelper.giveItemToPlayer(player, new ItemStack(Items.GLASS_BOTTLE));
+            }
         }
-        return PotionBundleUtils.getUses(stack) == 0 ? Config.SERVER.returnString.get() ? PotionBundleUtils.getString(stack) : ItemStack.EMPTY : stack;
+
+        entity.gameEvent(GameEvent.DRINK);
+
+        if (PotionBundleUtils.getUses(stack) != 0) {
+            return stack;
+        }
+
+        if (Config.SERVER.returnString.get()) {
+            return PotionBundleUtils.getString(stack);
+        }
+
+        return ItemStack.EMPTY;
     }
 }
