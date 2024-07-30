@@ -4,7 +4,6 @@ import mezz.jei.api.IModPlugin;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.JeiPlugin;
-import mezz.jei.api.constants.ModIds;
 import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
@@ -37,7 +36,7 @@ import java.util.stream.Stream;
 public class JEICompat implements IModPlugin {
     @Override
     public ResourceLocation getPluginUid() {
-        return new ResourceLocation(PotionBundles.MODID, PotionBundles.MODID);
+        return ResourceLocation.fromNamespaceAndPath(PotionBundles.MODID, PotionBundles.MODID);
     }
 
     @Override
@@ -74,7 +73,7 @@ public class JEICompat implements IModPlugin {
                     inputs.set(maxUses, recipe.getString());
                     ItemStack output = PotionContents.createItemStack(bundleItem, potion);
                     PotionBundleUtils.setUses(output, maxUses);
-                    ResourceLocation id = new ResourceLocation(ModIds.MINECRAFT_ID, group + "." + output.getDescriptionId() + "." + Potion.getName(Optional.of(potion), ""));
+                    ResourceLocation id = ResourceLocation.withDefaultNamespace(group + "." + output.getDescriptionId() + "." + Potion.getName(Optional.of(potion), ""));
                     return new RecipeHolder<>(id, new ShapelessRecipe(group, CraftingBookCategory.EQUIPMENT, output, inputs));
                 });
     }

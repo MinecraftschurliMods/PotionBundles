@@ -10,14 +10,10 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.PotionContents;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
-import net.minecraft.world.item.crafting.CustomRecipe;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 
 import java.util.Objects;
@@ -51,11 +47,11 @@ public class PotionBundleRecipe extends CustomRecipe {
     }
 
     @Override
-    public boolean matches(CraftingContainer inv, Level world) {
+    public boolean matches(CraftingInput inv, Level world) {
         int potions = 0;
         boolean string = false;
         PotionContents potionContents = null;
-        for (int i = 0; i < inv.getContainerSize(); i++) {
+        for (int i = 0; i < inv.size(); i++) {
             ItemStack is = inv.getItem(i);
             if (this.string.test(is)) {
                 if (string) return false;
@@ -81,10 +77,10 @@ public class PotionBundleRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer inv, HolderLookup.Provider provider) {
+    public ItemStack assemble(CraftingInput inv, HolderLookup.Provider provider) {
         PotionBundleString string = null;
         PotionContents potionContents = null;
-        for (int i = 0; i < inv.getContainerSize(); i++) {
+        for (int i = 0; i < inv.size(); i++) {
             ItemStack is = inv.getItem(i);
             if (potionContents == null && is.is(this.potion)) {
                 potionContents = is.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);

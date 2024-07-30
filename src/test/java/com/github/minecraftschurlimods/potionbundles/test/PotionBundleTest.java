@@ -39,8 +39,8 @@ public class PotionBundleTest {
         MobEffectInstance customEffect = new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20);
         ItemStack bundle = potionBundle.createStack(string, Potions.WATER, List.of(customEffect), null);
         assertUses(bundle, maxUses, "Uses don't use items max uses");
-        int duration = potionBundle.getUseDuration(bundle);
         Player player = setupPlayer(helper, bundle);
+        int duration = potionBundle.getUseDuration(bundle, player);
         GameTestSequence sequence = helper.startSequence();
         for (int i = 0; i < maxUses; i++) {
             int index = i + 1;

@@ -20,7 +20,7 @@ public class ClientHandler {
         e.enqueueWork(() -> {
             @SuppressWarnings("deprecation")
             ItemPropertyFunction propertyFunction = (stack, world, living, seed) -> stack.getOrDefault(PotionBundles.USES, 0);
-            ResourceLocation uses = new ResourceLocation(PotionBundles.MODID, "uses");
+            ResourceLocation uses = ResourceLocation.fromNamespaceAndPath(PotionBundles.MODID, "uses");
             for (DeferredHolder<Item, ?> item : PotionBundles.ITEMS.getEntries()) {
                 ItemProperties.register(item.get(), uses, propertyFunction);
             }
