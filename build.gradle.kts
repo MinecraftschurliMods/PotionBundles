@@ -2,7 +2,7 @@ import com.github.minecraftschurlimods.helperplugin.version
 
 plugins {
     idea
-    id("net.neoforged.gradle.userdev")
+    id("net.neoforged.moddev")
     id ("com.github.minecraftschurlimods.helperplugin")
 }
 
@@ -22,7 +22,6 @@ repositories {
 val jei = helper.dependencies.jei()
 
 dependencies {
-    implementation(helper.neoforge())
     val jeiApiDep = helper.minecraftVersion.zip(jei.version) { mc, version -> "mezz.jei:jei-${mc}-common-api:${version}" }
     val jeiDep = helper.minecraftVersion.zip(jei.version) { mc, version -> "mezz.jei:jei-${mc}-neoforge:${version}" }
     compileOnly(jeiApiDep)
