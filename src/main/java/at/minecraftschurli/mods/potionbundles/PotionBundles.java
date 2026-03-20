@@ -8,22 +8,21 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -33,8 +32,6 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 @Mod(PotionBundles.MODID)
@@ -54,7 +51,6 @@ public final class PotionBundles {
         RECIPE_SERIALIZERS.register(modEventBus);
         modEventBus.addListener(PotionBundles::registerItemsToCreativeTabs);
         container.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
-        NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent evt) -> evt.addListener((SimpleReloadListener) PotionBundleUtils::onReload));
     }
 
     private static void registerItemsToCreativeTabs(BuildCreativeModeTabContentsEvent event) {
@@ -69,7 +65,7 @@ public final class PotionBundles {
             stringSplash = getStringFromRecipe(PotionBundlesItems.SPLASH_POTION_BUNDLE.get(), holderLookupProvider, recipeManager);
             stringLingering = getStringFromRecipe(PotionBundlesItems.LINGERING_POTION_BUNDLE.get(), holderLookupProvider, recipeManager);
         } else {
-            LOGGER.error("No RecipeManager available, can't get correct string for potion bundles.");
+            LOGGER.info("No RecipeManager available, can't get correct string for potion bundles.");
             stringBasic = stringSplash = stringLingering = null;
         }
         addBundlesForAllPotions(event, PotionBundlesItems.POTION_BUNDLE.get(), stringBasic);
@@ -78,7 +74,7 @@ public final class PotionBundles {
     }
 
     private static void addBundlesForAllPotions(BuildCreativeModeTabContentsEvent populator, AbstractPotionBundle bundle, @Nullable PotionBundleString string) {
-        BuiltInRegistries.POTION.holders().forEach(potion -> {
+        BuiltInRegistries.POTION.listElements().forEach(potion -> {
             ItemStack stack = bundle.createStack(string, new PotionContents(potion));
             if (!stack.isEmpty()) {
                 populator.accept(stack);
@@ -91,23 +87,16 @@ public final class PotionBundles {
         for (RecipeHolder<?> holder : recipeManager.getRecipes()) {
             Recipe<?> recipe = holder.value();
             if (recipe.getSerializer() != POTION_BUNDLE_RECIPE_SERIALIZER.get()) continue;
-            if (recipe.getResultItem(holderLookupProvider).getItem() != bundle) continue;
-            for (ItemStack stack : ((PotionBundleRecipe) recipe).getString().getItems()) {
+            if (!(recipe instanceof PotionBundleRecipe potionBundleRecipe) || potionBundleRecipe.getBundleItem() != bundle) continue;
+            ContextMap context = new ContextMap.Builder()
+                .withParameter(SlotDisplayContext.REGISTRIES, holderLookupProvider)
+                .create(SlotDisplayContext.CONTEXT);
+            for (ItemStack stack : potionBundleRecipe.getString().display().resolveForStacks(context)) {
                 if (!stack.isEmpty()) {
                     return PotionBundleString.fromItemStack(stack);
                 }
             }
         }
         return null;
-    }
-
-    @FunctionalInterface
-    private interface SimpleReloadListener extends PreparableReloadListener {
-        @Override
-        default CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
-            return CompletableFuture.<Void>completedFuture(null).thenCompose(preparationBarrier::wait).thenAcceptAsync(($) -> onReload(), gameExecutor);
-        }
-
-        void onReload();
     }
 }

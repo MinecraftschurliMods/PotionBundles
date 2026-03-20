@@ -9,7 +9,7 @@ public final class ServerConfig {
 
     public final ModConfigSpec.BooleanValue returnString;
 
-    ServerConfig(ModConfigSpec.Builder builder) {
+    private ServerConfig(ModConfigSpec.Builder builder) {
         returnString = builder
             .comment("Whether to return the string upon finishing the bundle or not.")
             .translation("config." + PotionBundles.MODID + ".returnString")

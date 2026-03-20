@@ -1,22 +1,37 @@
 package at.minecraftschurli.mods.potionbundles.item;
 
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.network.chat.Component;
+import net.minecraft.core.Position;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.AbstractThrownPotion;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownLingeringPotion;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
-import java.util.List;
-
 public class LingeringPotionBundle extends AbstractThrowablePotionBundle {
+
+    public LingeringPotionBundle(Properties properties) {
+        super(properties);
+    }
+
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).addPotionTooltip(tooltip::add, 0.25F, context.tickRate());
-        super.appendHoverText(stack, context, tooltip, flag);
+    public Item getVanillaPotion() {
+        return Items.LINGERING_POTION;
+    }
+
+    @Override
+    protected AbstractThrownPotion createPotion(ServerLevel level, LivingEntity entity, ItemStack stack) {
+        return new ThrownLingeringPotion(level, entity, stack);
+    }
+
+    @Override
+    protected AbstractThrownPotion createPotion(Level level, Position pos, ItemStack stack) {
+        return new ThrownLingeringPotion(level, pos.x(), pos.y(), pos.z(), stack);
     }
 
     @Override

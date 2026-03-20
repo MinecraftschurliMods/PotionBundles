@@ -23,7 +23,7 @@ import java.util.function.Function;
 
 public class PotionBundleRecipe extends CustomRecipe {
     private static final MapCodec<PotionBundleRecipe> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
-            Ingredient.CODEC_NONEMPTY.fieldOf("string").forGetter(PotionBundleRecipe::getString),
+            Ingredient.CODEC.fieldOf("string").forGetter(PotionBundleRecipe::getString),
             BuiltInRegistries.ITEM.byNameCodec().fieldOf("potion").forGetter(PotionBundleRecipe::getPotionItem),
             BuiltInRegistries.ITEM.byNameCodec().comapFlatMap(bundle -> bundle instanceof AbstractPotionBundle bundle1 ? DataResult.success(bundle1) : DataResult.error(() -> "The defined PotionBundle is not an instance of AbstractPotionBundle"), Function.identity()).fieldOf("bundle").forGetter(PotionBundleRecipe::getBundleItem)
     ).apply(inst, PotionBundleRecipe::new));
@@ -96,12 +96,7 @@ public class PotionBundleRecipe extends CustomRecipe {
     }
 
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return width * height > this.bundle.getMaxUses();
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<? extends CustomRecipe> getSerializer() {
         return PotionBundles.POTION_BUNDLE_RECIPE_SERIALIZER.get();
     }
 

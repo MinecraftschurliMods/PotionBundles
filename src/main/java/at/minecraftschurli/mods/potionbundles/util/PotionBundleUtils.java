@@ -1,23 +1,12 @@
 package at.minecraftschurli.mods.potionbundles.util;
 
-import at.minecraftschurli.mods.potionbundles.PotionBundleRecipe;
 import at.minecraftschurli.mods.potionbundles.PotionBundles;
-import at.minecraftschurli.mods.potionbundles.item.AbstractPotionBundle;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeType;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 public final class PotionBundleUtils {
-    private static final Map<AbstractPotionBundle, Item> POTION_FOR_BUNDLE_CACHE = new HashMap<>();
-
     private PotionBundleUtils() {
         throw new NotImplementedException("You can't instantiate a utility class");
     }
@@ -41,23 +30,5 @@ public final class PotionBundleUtils {
 
     public static void setString(ItemStack stack, @Nullable PotionBundleString string) {
         stack.set(PotionBundles.STRING, string);
-    }
-
-    public static void onReload() {
-        POTION_FOR_BUNDLE_CACHE.clear();
-    }
-
-    public static Item getPotionForBundle(AbstractPotionBundle bundle) {
-        return POTION_FOR_BUNDLE_CACHE.computeIfAbsent(bundle, b -> Optional.ofNullable(SidedGetter.getRecipeManager()).flatMap(recipeManager -> recipeManager
-                .getAllRecipesFor(RecipeType.CRAFTING)
-                .stream()
-                .map(RecipeHolder::value)
-                .filter(recipe -> recipe.getSerializer() == PotionBundles.POTION_BUNDLE_RECIPE_SERIALIZER.get())
-                .filter(PotionBundleRecipe.class::isInstance)
-                .map(PotionBundleRecipe.class::cast)
-                .filter(recipe -> recipe.getBundleItem() == b)
-                .findFirst()
-                .map(PotionBundleRecipe::getPotionItem))
-                .orElse(Items.POTION));
     }
 }

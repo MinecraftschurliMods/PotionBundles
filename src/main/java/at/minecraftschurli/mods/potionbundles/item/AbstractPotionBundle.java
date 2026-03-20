@@ -14,15 +14,17 @@ import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.TooltipDisplay;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public abstract class AbstractPotionBundle extends PotionItem {
-    public AbstractPotionBundle() {
-        super(new Item.Properties().stacksTo(1));
+    protected AbstractPotionBundle(Item.Properties properties) {
+        super(properties);
     }
 
     @Override
@@ -44,8 +46,8 @@ public abstract class AbstractPotionBundle extends PotionItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.translatable(getDescriptionId() + ".uses", PotionBundleUtils.getUses(stack)));
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltipAdder, TooltipFlag flag) {
+        tooltipAdder.accept(Component.translatable(getDescriptionId() + ".uses", PotionBundleUtils.getUses(stack)));
     }
 
     @Override
@@ -60,12 +62,14 @@ public abstract class AbstractPotionBundle extends PotionItem {
 
     @Override
     public Component getName(ItemStack stack) {
-        return Component.translatable(getDescriptionId(), PotionBundleUtils.getPotionForBundle(this).getName(stack));
+        return Component.translatable(getDescriptionId(), this.getVanillaPotion().getName(stack));
     }
 
+    public abstract Item getVanillaPotion();
+
     @VisibleForTesting
-    public ItemStack createStack(@Nullable PotionBundleString string, Holder<Potion> potion, List<MobEffectInstance> customEffects, @Nullable Integer customColor) {
-        return createStack(string, new PotionContents(Optional.of(potion), Optional.ofNullable(customColor), customEffects));
+    public ItemStack createStack(@Nullable PotionBundleString string, Holder<Potion> potion, List<MobEffectInstance> customEffects, @Nullable Integer customColor, @Nullable String customName) {
+        return createStack(string, new PotionContents(Optional.of(potion), Optional.ofNullable(customColor), customEffects, Optional.ofNullable(customName)));
     }
 
     @VisibleForTesting
