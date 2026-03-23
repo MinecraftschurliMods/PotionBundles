@@ -1,5 +1,7 @@
-package com.github.minecraftschurlimods.potionbundles;
+package com.github.minecraftschurlimods.potionbundles.item;
 
+import com.github.minecraftschurlimods.potionbundles.util.PotionBundleUtils;
+import com.github.minecraftschurlimods.potionbundles.ServerConfig;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -54,7 +56,7 @@ public class PotionBundle extends AbstractPotionBundle {
             return stack;
         }
 
-        if (Config.SERVER.returnString.get()) {
+        if (ServerConfig.INSTANCE.returnString.get()) {
             return PotionBundleUtils.getString(stack);
         }
 

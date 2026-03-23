@@ -17,6 +17,7 @@ jobs:
     with:
       maven-url: ${{ vars.MAVEN_URL }}
       maven-user: ${{ vars.MAVEN_USER }}
+      java-version: 21
       publish-to-maven: true
       check-datagen: false
     secrets:
