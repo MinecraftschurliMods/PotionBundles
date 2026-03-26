@@ -5,7 +5,6 @@ import at.minecraftschurli.mods.potionbundles.util.PotionBundleString;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -22,12 +21,12 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public class PotionBundleRecipe extends CustomRecipe {
-    private static final MapCodec<PotionBundleRecipe> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+    public static final MapCodec<PotionBundleRecipe> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
             Ingredient.CODEC.fieldOf("string").forGetter(PotionBundleRecipe::getString),
             BuiltInRegistries.ITEM.byNameCodec().fieldOf("potion").forGetter(PotionBundleRecipe::getPotionItem),
             BuiltInRegistries.ITEM.byNameCodec().comapFlatMap(bundle -> bundle instanceof AbstractPotionBundle bundle1 ? DataResult.success(bundle1) : DataResult.error(() -> "The defined PotionBundle is not an instance of AbstractPotionBundle"), Function.identity()).fieldOf("bundle").forGetter(PotionBundleRecipe::getBundleItem)
     ).apply(inst, PotionBundleRecipe::new));
-    private static final StreamCodec<RegistryFriendlyByteBuf, PotionBundleRecipe> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<RegistryFriendlyByteBuf, PotionBundleRecipe> STREAM_CODEC = StreamCodec.composite(
             Ingredient.CONTENTS_STREAM_CODEC,
             PotionBundleRecipe::getString,
             ByteBufCodecs.registry(Registries.ITEM),
@@ -42,7 +41,7 @@ public class PotionBundleRecipe extends CustomRecipe {
     private final AbstractPotionBundle bundle;
 
     public PotionBundleRecipe(Ingredient string, Item potion, AbstractPotionBundle bundle) {
-        super(CraftingBookCategory.EQUIPMENT);
+        super();
         this.string = string;
         this.potion = potion;
         this.bundle = bundle;
@@ -79,7 +78,7 @@ public class PotionBundleRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingInput inv, HolderLookup.Provider provider) {
+    public ItemStack assemble(CraftingInput inv) {
         PotionBundleString string = null;
         PotionContents potionContents = null;
         for (int i = 0; i < inv.size(); i++) {
@@ -110,17 +109,5 @@ public class PotionBundleRecipe extends CustomRecipe {
 
     public Ingredient getString() {
         return string;
-    }
-
-    static class Serializer implements RecipeSerializer<PotionBundleRecipe> {
-        @Override
-        public MapCodec<PotionBundleRecipe> codec() {
-            return CODEC;
-        }
-
-        @Override
-        public StreamCodec<RegistryFriendlyByteBuf, PotionBundleRecipe> streamCodec() {
-            return STREAM_CODEC;
-        }
     }
 }

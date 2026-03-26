@@ -42,6 +42,6 @@ public record PotionBundleString(Holder<Item> item, DataComponentPatch component
     }
 
     public static PotionBundleString fromItemStack(ItemStack itemStack) {
-        return new PotionBundleString(itemStack.getItemHolder(), itemStack.getComponentsPatch());
+        return new PotionBundleString(itemStack.typeHolder(), itemStack.getComponentsPatch());
     }
 }

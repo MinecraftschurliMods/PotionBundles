@@ -43,7 +43,7 @@ public final class PotionBundles {
     static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, MODID);
     public static final Supplier<DataComponentType<Integer>> USES = DATA_COMPONENTS.registerComponentType("uses", builder -> builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT));
     public static final Supplier<DataComponentType<PotionBundleString>> STRING = DATA_COMPONENTS.registerComponentType("string", builder -> builder.persistent(PotionBundleString.CODEC.codec()).networkSynchronized(PotionBundleString.STREAM_CODEC));
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<PotionBundleRecipe>> POTION_BUNDLE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("crafting_special_potion_bundle", PotionBundleRecipe.Serializer::new);
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<PotionBundleRecipe>> POTION_BUNDLE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("crafting_special_potion_bundle", () -> new RecipeSerializer<>(PotionBundleRecipe.CODEC, PotionBundleRecipe.STREAM_CODEC));
 
     public PotionBundles(ModContainer container, IEventBus modEventBus) {
         DATA_COMPONENTS.register(modEventBus);

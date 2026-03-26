@@ -24,7 +24,7 @@ final class PBRecipeProvider extends RecipeProvider {
     protected void buildRecipes() {
         for (DeferredHolder<Item, ? extends Item> entry : PotionBundlesItems.ITEMS.getEntries()) {
             if (!(entry.get() instanceof AbstractPotionBundle bundle)) continue;
-            SpecialRecipeBuilder.special(cat -> new PotionBundleRecipe(
+            SpecialRecipeBuilder.special(() -> new PotionBundleRecipe(
                 Ingredient.of(registries.lookupOrThrow(Registries.ITEM).getOrThrow(Tags.Items.STRINGS)),
                 bundle.getVanillaPotion(),
                 bundle
