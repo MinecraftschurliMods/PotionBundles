@@ -1,0 +1,6 @@
+{
+  "type": "potionbundles:crafting_special_potion_bundle",
+  "bundle": "potionbundles:splash_potion_bundle",
+  "potion": "minecraft:splash_potion",
+  "string": "#c:strings"
+}

@@ -19,6 +19,7 @@ jobs:
       maven-user: ${{ vars.MAVEN_USER }}
       java-version: 21
       publish-to-maven: true
-      check-datagen: false
+      datagen-folder: src/main/generated/
+      run-datagen-task: 'runClientData'
     secrets:
       MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
