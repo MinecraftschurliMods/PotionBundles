@@ -1,6 +1,10 @@
 package com.github.minecraftschurlimods.potionbundles.test;
 
 import com.github.minecraftschurlimods.potionbundles.*;
+import com.github.minecraftschurlimods.potionbundles.item.AbstractThrowablePotionBundle;
+import com.github.minecraftschurlimods.potionbundles.item.PotionBundle;
+import com.github.minecraftschurlimods.potionbundles.util.PotionBundleString;
+import com.github.minecraftschurlimods.potionbundles.util.PotionBundleUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTest;
@@ -34,7 +38,7 @@ public class PotionBundleTest {
     @GameTest(template = "empty_3x3")
     public static void testPotionBundle(GameTestHelper helper) {
         PotionBundleString string = PotionBundleString.fromItem(Items.STRING);
-        PotionBundle potionBundle = PotionBundles.POTION_BUNDLE.get();
+        PotionBundle potionBundle = PotionBundlesItems.POTION_BUNDLE.get();
         int maxUses = potionBundle.getMaxUses();
         MobEffectInstance customEffect = new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20);
         ItemStack bundle = potionBundle.createStack(string, Potions.WATER, List.of(customEffect), null);
@@ -60,13 +64,13 @@ public class PotionBundleTest {
 
     @GameTest(template = "empty_3x3")
     public static void testSplashPotionBundle(GameTestHelper helper) {
-        AbstractThrowablePotionBundle potionBundle = PotionBundles.SPLASH_POTION_BUNDLE.get();
+        AbstractThrowablePotionBundle potionBundle = PotionBundlesItems.SPLASH_POTION_BUNDLE.get();
         testThrownPotionBundle(helper, potionBundle);
     }
 
     @GameTest(template = "empty_3x3")
     public static void testLingeringPotionBundle(GameTestHelper helper) {
-        AbstractThrowablePotionBundle potionBundle = PotionBundles.LINGERING_POTION_BUNDLE.get();
+        AbstractThrowablePotionBundle potionBundle = PotionBundlesItems.LINGERING_POTION_BUNDLE.get();
         testThrownPotionBundle(helper, potionBundle);
     }
 
@@ -98,12 +102,12 @@ public class PotionBundleTest {
                         if (mobEffects.size() != 1 || !mobEffects.getFirst().equals(customEffect)) {
                             fail("Wrong potion thrown");
                         }
-                        if (potionBundle == PotionBundles.SPLASH_POTION_BUNDLE.get()) {
+                        if (potionBundle == PotionBundlesItems.SPLASH_POTION_BUNDLE.get()) {
                             if (!thrownPotionItem.is(Items.SPLASH_POTION)) {
                                 helper.fail("Wrong potion type thrown");
                             }
                         }
-                        if (potionBundle == PotionBundles.LINGERING_POTION_BUNDLE.get()) {
+                        if (potionBundle == PotionBundlesItems.LINGERING_POTION_BUNDLE.get()) {
                             if (!thrownPotionItem.is(Items.LINGERING_POTION)) {
                                 helper.fail("Wrong potion type thrown");
                             }

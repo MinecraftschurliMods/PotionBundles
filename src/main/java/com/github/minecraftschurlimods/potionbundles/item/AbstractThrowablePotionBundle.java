@@ -1,5 +1,7 @@
-package com.github.minecraftschurlimods.potionbundles;
+package com.github.minecraftschurlimods.potionbundles.item;
 
+import com.github.minecraftschurlimods.potionbundles.util.PotionBundleUtils;
+import com.github.minecraftschurlimods.potionbundles.ServerConfig;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
@@ -29,7 +31,7 @@ public abstract class AbstractThrowablePotionBundle extends AbstractPotionBundle
         if (PotionBundleUtils.getUses(itemstack) != 0) {
             return InteractionResultHolder.sidedSuccess(itemstack, world.isClientSide());
         }
-        return InteractionResultHolder.sidedSuccess(Config.SERVER.returnString.get() ? PotionBundleUtils.getString(itemstack) : ItemStack.EMPTY, world.isClientSide());
+        return InteractionResultHolder.sidedSuccess(ServerConfig.INSTANCE.returnString.get() ? PotionBundleUtils.getString(itemstack) : ItemStack.EMPTY, world.isClientSide());
     }
 
     protected abstract void playThrowSound(Level world, Player player);

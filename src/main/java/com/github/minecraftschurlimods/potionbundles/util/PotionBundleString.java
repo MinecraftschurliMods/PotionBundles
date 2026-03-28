@@ -1,4 +1,4 @@
-package com.github.minecraftschurlimods.potionbundles;
+package com.github.minecraftschurlimods.potionbundles.util;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

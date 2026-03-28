@@ -1,5 +1,8 @@
-package com.github.minecraftschurlimods.potionbundles;
+package com.github.minecraftschurlimods.potionbundles.util;
 
+import com.github.minecraftschurlimods.potionbundles.PotionBundleRecipe;
+import com.github.minecraftschurlimods.potionbundles.PotionBundles;
+import com.github.minecraftschurlimods.potionbundles.item.AbstractPotionBundle;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -40,7 +43,7 @@ public final class PotionBundleUtils {
         stack.set(PotionBundles.STRING, string);
     }
 
-    static void onReload() {
+    public static void onReload() {
         POTION_FOR_BUNDLE_CACHE.clear();
     }
 

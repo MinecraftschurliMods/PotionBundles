@@ -1,15 +1,18 @@
-package com.github.minecraftschurlimods.potionbundles;
+package com.github.minecraftschurlimods.potionbundles.compat;
 
+import com.github.minecraftschurlimods.potionbundles.PotionBundleRecipe;
+import com.github.minecraftschurlimods.potionbundles.util.PotionBundleUtils;
+import com.github.minecraftschurlimods.potionbundles.PotionBundles;
+import com.github.minecraftschurlimods.potionbundles.PotionBundlesItems;
+import com.github.minecraftschurlimods.potionbundles.item.AbstractPotionBundle;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.constants.RecipeTypes;
-import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.JeiPlugin;
-import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
+import mezz.jei.library.plugins.vanilla.ingredients.subtypes.PotionSubtypeInterpreter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
@@ -33,7 +36,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @JeiPlugin
-public class JEICompat implements IModPlugin {
+public final class JEICompat implements IModPlugin {
     @Override
     public ResourceLocation getPluginUid() {
         return ResourceLocation.fromNamespaceAndPath(PotionBundles.MODID, PotionBundles.MODID);
@@ -80,9 +83,8 @@ public class JEICompat implements IModPlugin {
 
     @Override
     public void registerItemSubtypes(ISubtypeRegistration r) {
-        IIngredientSubtypeInterpreter<ItemStack> byPotion = (ingredient, context) -> ingredient.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).potion().map(Holder::getRegisteredName).orElse("unknown");
-        r.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, PotionBundles.POTION_BUNDLE.get(), byPotion);
-        r.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, PotionBundles.SPLASH_POTION_BUNDLE.get(), byPotion);
-        r.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, PotionBundles.LINGERING_POTION_BUNDLE.get(), byPotion);
+        r.registerSubtypeInterpreter(PotionBundlesItems.POTION_BUNDLE.get(), PotionSubtypeInterpreter.INSTANCE);
+        r.registerSubtypeInterpreter(PotionBundlesItems.SPLASH_POTION_BUNDLE.get(), PotionSubtypeInterpreter.INSTANCE);
+        r.registerSubtypeInterpreter(PotionBundlesItems.LINGERING_POTION_BUNDLE.get(), PotionSubtypeInterpreter.INSTANCE);
     }
 }

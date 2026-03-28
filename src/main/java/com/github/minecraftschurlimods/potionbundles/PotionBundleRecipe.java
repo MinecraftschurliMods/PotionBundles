@@ -1,5 +1,7 @@
 package com.github.minecraftschurlimods.potionbundles;
 
+import com.github.minecraftschurlimods.potionbundles.item.AbstractPotionBundle;
+import com.github.minecraftschurlimods.potionbundles.util.PotionBundleString;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

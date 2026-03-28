@@ -1,5 +1,9 @@
-package com.github.minecraftschurlimods.potionbundles;
+package com.github.minecraftschurlimods.potionbundles.item;
 
+import com.github.minecraftschurlimods.potionbundles.util.PotionBundleString;
+import com.github.minecraftschurlimods.potionbundles.util.PotionBundleUtils;
+import com.github.minecraftschurlimods.potionbundles.PotionBundles;
+import com.github.minecraftschurlimods.potionbundles.client.ClientConfig;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -35,7 +39,7 @@ public abstract class AbstractPotionBundle extends PotionItem {
 
     @Override
     public int getBarWidth(ItemStack stack) {
-        if (Config.CLIENT.durabilityBarColor.get() == -1) return 1;
+        if (ClientConfig.INSTANCE.durabilityBarColor.get() == -1) return 1;
         return Math.round((float) PotionBundleUtils.getUses(stack) / getMaxUses() * 13f);
     }
 
@@ -46,12 +50,12 @@ public abstract class AbstractPotionBundle extends PotionItem {
 
     @Override
     public int getBarColor(ItemStack stack) {
-        return Config.CLIENT.durabilityBarColor.get();
+        return ClientConfig.INSTANCE.durabilityBarColor.get();
     }
 
     @Override
     public boolean isBarVisible(ItemStack stack) {
-        return Config.CLIENT.showDurabilityBar.get();
+        return ClientConfig.INSTANCE.showDurabilityBar.get();
     }
 
     @Override
