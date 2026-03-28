@@ -12,7 +12,7 @@ jobs:
     with:
       maven-url: ${{ vars.MAVEN_URL }}
       maven-user: ${{ vars.MAVEN_USER }}
-      java-version: 21
+      java-version: 25
       upload-artifacts: true
       artifact-retention: 1
       publish-to-maven: true

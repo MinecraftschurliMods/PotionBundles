@@ -9,6 +9,7 @@ import net.minecraft.client.data.models.model.ItemModelUtils;
 import net.minecraft.client.data.models.model.ModelLocationUtils;
 import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.renderer.item.RangeSelectItemModel;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
@@ -35,7 +36,7 @@ final class PBModelProvider extends ModelProvider {
                             ItemModelUtils.tintedModel(
                                 itemModels.generateLayeredItem(
                                     ModelLocationUtils.getModelLocation(item, "_" + uses),
-                                    Identifier.fromNamespaceAndPath(PotionBundles.MODID, "item/potion_bundle_overlay_" + uses),
+                                    new Material(Identifier.fromNamespaceAndPath(PotionBundles.MODID, "item/potion_bundle_overlay_" + uses)),
                                     TextureMapping.getItemTexture(item, "_" + uses)),
                                 new Potion())))
                         .toList()));

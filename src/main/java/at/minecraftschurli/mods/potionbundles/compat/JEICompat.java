@@ -1,7 +1,6 @@
 package at.minecraftschurli.mods.potionbundles.compat;
 
 import at.minecraftschurli.mods.potionbundles.PotionBundleRecipe;
-import at.minecraftschurli.mods.potionbundles.util.PotionBundleUtils;
 import at.minecraftschurli.mods.potionbundles.PotionBundles;
 import at.minecraftschurli.mods.potionbundles.PotionBundlesItems;
 import at.minecraftschurli.mods.potionbundles.item.AbstractPotionBundle;
@@ -20,11 +19,13 @@ import mezz.jei.library.plugins.vanilla.ingredients.subtypes.PotionSubtypeInterp
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingRecipe;
@@ -73,10 +74,9 @@ public final class JEICompat implements IModPlugin {
             .stream()
             .flatMap(HolderLookup::listElements)
             .map(potion -> {
-                ItemStack input = PotionContents.createItemStack(potionItem, potion);
-                Ingredient potionIngredient = Ingredient.of(input.getItem());
-                ItemStack output = PotionContents.createItemStack(bundleItem, potion);
-                PotionBundleUtils.setUses(output, maxUses);
+                ItemStackTemplate input = new ItemStackTemplate(potionItem, DataComponentPatch.builder().set(DataComponents.POTION_CONTENTS, new PotionContents(potion)).build());
+                Ingredient potionIngredient = Ingredient.of(input.item().value());
+                ItemStackTemplate output = new ItemStackTemplate(bundleItem, DataComponentPatch.builder().set(DataComponents.POTION_CONTENTS, new PotionContents(potion)).set(PotionBundles.USES.get(), maxUses).build());
                 Identifier potionId = potion.key().identifier();
                 Identifier recipeId = Identifier.fromNamespaceAndPath(ModIds.MINECRAFT_ID, group + "." + potionId.getNamespace() + "." + potionId.getPath());
                 ResourceKey<Recipe<?>> resourceKey = ResourceKey.create(Registries.RECIPE, recipeId);
