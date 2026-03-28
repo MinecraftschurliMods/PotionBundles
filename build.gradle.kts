@@ -25,7 +25,7 @@ val jei = helper.dependencies.jei()
 dependencies {
     implementation(helper.neoforge())
     testImplementation(helper.testframework())
-    implementation(helper.minecraftVersion.zip(jei.version) { mc, version -> "mezz.jei:jei-${/*mc*/"26.1-pre-3"}-neoforge:${version}" })
+    implementation(helper.minecraftVersion.zip(jei.version) { mc, version -> "mezz.jei:jei-${mc}-neoforge:${version}" })
     implementation("org.jetbrains:annotations:23.0.0")
     "testCompileOnly"("org.jetbrains:annotations:23.0.0")
 }
