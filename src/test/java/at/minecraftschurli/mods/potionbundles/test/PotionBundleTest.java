@@ -2,8 +2,8 @@ package at.minecraftschurli.mods.potionbundles.test;
 
 import at.minecraftschurli.mods.potionbundles.PotionBundles;
 import at.minecraftschurli.mods.potionbundles.PotionBundlesItems;
+import at.minecraftschurli.mods.potionbundles.item.AbstractPotionBundle;
 import at.minecraftschurli.mods.potionbundles.item.AbstractThrowablePotionBundle;
-import at.minecraftschurli.mods.potionbundles.item.PotionBundle;
 import at.minecraftschurli.mods.potionbundles.util.PotionBundleString;
 import at.minecraftschurli.mods.potionbundles.util.PotionBundleUtils;
 import net.minecraft.core.BlockPos;
@@ -18,100 +18,122 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.AbstractThrownPotion;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
-import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.PlayerInventoryWrapper;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.neoforged.testframework.annotation.ForEachTest;
+import net.neoforged.testframework.annotation.TestHolder;
 import net.neoforged.testframework.gametest.GameTest;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.BiConsumer;
 
+@ForEachTest(groups = PotionBundles.MODID)
 public class PotionBundleTest {
-    @GameTest(template = "empty_3x3")
+    @GameTest(template = Tests.TEMPLATE_3x3)
+    @TestHolder(description = "Tests the potion bundle item functionality")
     public static void testPotionBundle(GameTestHelper helper) {
-        PotionBundleString string = PotionBundleString.fromItem(Items.STRING);
-        PotionBundle potionBundle = PotionBundlesItems.POTION_BUNDLE.get();
+        PotionContents potionContents = new PotionContents(Optional.empty(), Optional.empty(), List.of(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20)), Optional.empty());
+        testPotionBundle(helper, PotionBundlesItems.POTION_BUNDLE.get(), PotionBundleString.fromItem(Items.STRING), potionContents, (index, player) -> {
+            assertItemsInInventory(helper, player.getInventory(), new ItemStack(Items.GLASS_BOTTLE), index, "Did not return glass bottle");
+            assertSameEffects(helper, potionContents, 1.0f, player.getActiveEffects(), "Wrong effects applied");
+            player.removeAllEffects();
+        });
+    }
+
+    @GameTest(template = Tests.TEMPLATE_3x3)
+    @TestHolder(description = "Tests the splash potion bundle item functionality")
+    public static void testSplashPotionBundle(GameTestHelper helper) {
+        AbstractThrowablePotionBundle potionBundle = PotionBundlesItems.SPLASH_POTION_BUNDLE.get();
+        testAbstractThrownPotionBundle(helper, potionBundle, Items.SPLASH_POTION, 1.0f, EntityType.SPLASH_POTION);
+    }
+
+    @GameTest(template = Tests.TEMPLATE_3x3)
+    @TestHolder(description = "Tests the lingering potion bundle item functionality")
+    public static void testLingeringPotionBundle(GameTestHelper helper) {
+        AbstractThrowablePotionBundle potionBundle = PotionBundlesItems.LINGERING_POTION_BUNDLE.get();
+        testAbstractThrownPotionBundle(helper, potionBundle, Items.LINGERING_POTION, 0.25F, EntityType.LINGERING_POTION);
+    }
+
+    private static void testPotionBundle(GameTestHelper helper, AbstractPotionBundle potionBundle, PotionBundleString string, PotionContents potionContents, BiConsumer<Integer, Player> assertFunction) {
         int maxUses = potionBundle.getMaxUses();
-        MobEffectInstance customEffect = new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20);
-        ItemStack bundle = potionBundle.createStack(string, Potions.WATER, List.of(customEffect), null, null);
+        ItemStack bundle = potionBundle.createStack(string, potionContents);
         assertUses(helper, bundle, maxUses, "Uses don't use items max uses");
         Player player = setupPlayer(helper, bundle);
         int duration = potionBundle.getUseDuration(bundle, player);
         GameTestSequence sequence = helper.startSequence();
         for (int i = 0; i < maxUses; i++) {
             int index = i + 1;
-            sequence.thenExecute(() -> player.setItemInHand(InteractionHand.MAIN_HAND, bundle.use(helper.getLevel(), player, InteractionHand.MAIN_HAND) instanceof InteractionResult.Success success ? success.heldItemTransformedTo() instanceof ItemStack s ? s : bundle : bundle))
-                    .thenExecuteAfter(duration + 1, () -> {
-                        player.stopUsingItem();
-                        assertBundleUsed(helper, player, index, maxUses, string, bundle);
-                        assertItemsInInventory(helper, player.getInventory(), new ItemStack(Items.GLASS_BOTTLE), index, "Did not return glass bottle");
-                        MobEffectInstance effect = player.getEffect(customEffect.getEffect());
-                        if (effect == null || effect.getDuration() + 1 != customEffect.getDuration()) {
-                            helper.fail("Did not apply effect");
-                        }
-                    });
+            Runnable assertions = () -> {
+                player.stopUsingItem();
+                assertBundleUsed(helper, player, index, maxUses, string, bundle);
+                assertFunction.accept(index, player);
+            };
+            sequence.thenExecute(() -> player.setItemInHand(InteractionHand.MAIN_HAND, bundle.use(helper.getLevel(), player, InteractionHand.MAIN_HAND) instanceof InteractionResult.Success success ? success.heldItemTransformedTo() instanceof ItemStack s ? s : bundle : bundle));
+            if (duration > 0) {
+                sequence.thenExecuteAfter(duration, assertions);
+            } else {
+                sequence.thenExecute(assertions);
+            }
         }
         sequence.thenSucceed();
     }
 
-    @GameTest(template = "empty_3x3")
-    public static void testSplashPotionBundle(GameTestHelper helper) {
-        AbstractThrowablePotionBundle potionBundle = PotionBundlesItems.SPLASH_POTION_BUNDLE.get();
-        testAbstractThrownPotionBundle(helper, potionBundle, EntityType.SPLASH_POTION);
-    }
-
-    @GameTest(template = "empty_3x3")
-    public static void testLingeringPotionBundle(GameTestHelper helper) {
-        AbstractThrowablePotionBundle potionBundle = PotionBundlesItems.LINGERING_POTION_BUNDLE.get();
-        testAbstractThrownPotionBundle(helper, potionBundle, EntityType.LINGERING_POTION);
-    }
-
-    private static <T extends AbstractThrownPotion> void testAbstractThrownPotionBundle(GameTestHelper helper, AbstractThrowablePotionBundle potionBundle, EntityType<T> entityType) {
+    private static <T extends AbstractThrownPotion> void testAbstractThrownPotionBundle(GameTestHelper helper, AbstractThrowablePotionBundle potionBundle, Item potionItem, float durationScale, EntityType<T> entityType) {
         PotionBundleString string = PotionBundleString.fromItem(Items.STRING);
-        MobEffectInstance customEffect = new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20);
-        int maxUses = potionBundle.getMaxUses();
-        ItemStack bundle = potionBundle.createStack(string, Potions.WATER, List.of(customEffect), null, null);
-        assertUses(helper, bundle, maxUses, "Uses don't use items max uses");
-        Player player = setupPlayer(helper, bundle);
-        GameTestSequence sequence = helper.startSequence();
-        for (int i = 0; i < maxUses; i++) {
-            int index = i + 1;
-            sequence.thenExecute(() -> player.setItemInHand(InteractionHand.MAIN_HAND, bundle.use(helper.getLevel(), player, InteractionHand.MAIN_HAND) instanceof InteractionResult.Success success ? success.heldItemTransformedTo() instanceof ItemStack s ? s : bundle : bundle))
-                    .thenExecute(() -> {
-                        assertBundleUsed(helper, player, index, maxUses, string, bundle);
-                        List<T> potions = helper.getEntities(entityType, new BlockPos(1, 1, 1), 2);
-                        if (potions.isEmpty()) {
-                            helper.fail("Did not throw potion");
-                        }
-                        if (potions.size() > 1) {
-                            helper.fail("Threw too many potions");
-                        }
-                        AbstractThrownPotion abstractThrownPotion = potions.getFirst();
-                        ItemStack abstractThrownPotionItem = abstractThrownPotion.getItem();
-                        PotionContents potionContents = abstractThrownPotionItem.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
-                        List<MobEffectInstance> mobEffects = new ArrayList<>();
-                        potionContents.forEachEffect(mobEffects::add, abstractThrownPotionItem.getOrDefault(DataComponents.POTION_DURATION_SCALE, 1f));
-                        if (mobEffects.size() != 1 || !mobEffects.getFirst().equals(customEffect)) {
-                            helper.fail("Wrong potion thrown");
-                        }
-                        if (potionBundle == PotionBundlesItems.SPLASH_POTION_BUNDLE.get()) {
-                            if (!abstractThrownPotionItem.is(Items.SPLASH_POTION)) {
-                                helper.fail("Wrong potion type thrown");
-                            }
-                        }
-                        if (potionBundle == PotionBundlesItems.LINGERING_POTION_BUNDLE.get()) {
-                            if (!abstractThrownPotionItem.is(Items.LINGERING_POTION)) {
-                                helper.fail("Wrong potion type thrown");
-                            }
-                        }
-                        abstractThrownPotion.discard();
-                    });
+        testPotionBundle(helper, potionBundle, string, new PotionContents(Optional.empty(), Optional.empty(), List.of(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20)), Optional.empty()), (_, _) -> {
+            List<T> potions = helper.getEntities(entityType, new BlockPos(1, 1, 1), 2);
+            if (potions.isEmpty()) {
+                helper.fail("Did not throw potion");
+            }
+            if (potions.size() > 1) {
+                helper.fail("Threw too many potions");
+            }
+            AbstractThrownPotion abstractThrownPotion = potions.getFirst();
+            ItemStack abstractThrownPotionItem = abstractThrownPotion.getItem();
+            if (!abstractThrownPotionItem.is(potionItem)) {
+                helper.fail("Wrong potion type thrown");
+            }
+            float actualDurationScale = abstractThrownPotionItem.getOrDefault(DataComponents.POTION_DURATION_SCALE, 1f);
+            if (actualDurationScale != durationScale) {
+                helper.fail("Potion with wrong duration scale thrown");
+            }
+            PotionContents potionContents = abstractThrownPotionItem.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+            List<MobEffectInstance> mobEffects = new ArrayList<>();
+            potionContents.forEachEffect(mobEffects::add, abstractThrownPotionItem.getOrDefault(DataComponents.POTION_DURATION_SCALE, 1f));
+            assertSameEffects(helper, potionContents, durationScale, mobEffects, "Potion with wrong effects thrown");
+            abstractThrownPotion.discard();
+        });
+    }
+
+    private static void assertSameEffects(GameTestHelper helper, PotionContents expectedContents, float durationScale, Collection<MobEffectInstance> actualEffects, String message) {
+        List<MobEffectInstance> actualList = new ArrayList<>(actualEffects);
+        List<MobEffectInstance> expectedList = new ArrayList<>();
+        expectedContents.forEachEffect(expectedList::add, durationScale);
+        if (actualList.size() != expectedList.size()) {
+            helper.fail(message + ": Expected " + expectedList.size() + " effects, but got " + actualList.size());
         }
-        sequence.thenSucceed();
+        for (MobEffectInstance expected : expectedList) {
+            boolean found = false;
+            for (MobEffectInstance actual : actualList) {
+                if (actual.equals(expected)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                helper.fail(message + ": Expected effect " + expected + " not found");
+            }
+        }
     }
 
     private static void assertBundleUsed(GameTestHelper helper, Player player, int index, int maxUses, PotionBundleString string, ItemStack bundle) {
@@ -144,13 +166,15 @@ public class PotionBundleTest {
     }
 
     private static void assertItemsInInventory(GameTestHelper helper, Inventory inventory, ItemStack item, int count, String message) {
-        int slot = inventory.findSlotMatchingItem(item);
-        if (slot == -1 || inventory.getItem(slot).getCount() != count) {
-            helper.fail(message);
+        try (Transaction transaction = Transaction.openRoot()) {
+            int actualCount = PlayerInventoryWrapper.of(inventory).extract(ItemResource.of(item), count, transaction);
+            if (actualCount != count) {
+                helper.fail(message);
+            }
         }
     }
 
-    private static @NotNull Player setupPlayer(GameTestHelper helper, ItemStack bundle) {
+    private static Player setupPlayer(GameTestHelper helper, ItemStack bundle) {
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         player.setPos(helper.absoluteVec(Vec3.ZERO));
         helper.getLevel().addFreshEntity(player);
