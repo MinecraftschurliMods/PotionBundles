@@ -15,6 +15,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.AbstractThrownPotion;
@@ -54,14 +55,14 @@ public class PotionBundleTest {
     @TestHolder(description = "Tests the splash potion bundle item functionality")
     public static void testSplashPotionBundle(GameTestHelper helper) {
         AbstractThrowablePotionBundle potionBundle = PotionBundlesItems.SPLASH_POTION_BUNDLE.get();
-        testAbstractThrownPotionBundle(helper, potionBundle, Items.SPLASH_POTION, 1.0f, EntityType.SPLASH_POTION);
+        testAbstractThrownPotionBundle(helper, potionBundle, Items.SPLASH_POTION, 1.0f, EntityTypes.SPLASH_POTION);
     }
 
     @GameTest(template = Tests.TEMPLATE_3x3)
     @TestHolder(description = "Tests the lingering potion bundle item functionality")
     public static void testLingeringPotionBundle(GameTestHelper helper) {
         AbstractThrowablePotionBundle potionBundle = PotionBundlesItems.LINGERING_POTION_BUNDLE.get();
-        testAbstractThrownPotionBundle(helper, potionBundle, Items.LINGERING_POTION, 0.25F, EntityType.LINGERING_POTION);
+        testAbstractThrownPotionBundle(helper, potionBundle, Items.LINGERING_POTION, 0.25F, EntityTypes.LINGERING_POTION);
     }
 
     private static void testPotionBundle(GameTestHelper helper, AbstractPotionBundle potionBundle, PotionBundleString string, PotionContents potionContents, BiConsumer<Integer, Player> assertFunction) {
