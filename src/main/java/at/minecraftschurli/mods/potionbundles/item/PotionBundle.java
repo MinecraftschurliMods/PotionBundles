@@ -2,6 +2,7 @@ package at.minecraftschurli.mods.potionbundles.item;
 
 import at.minecraftschurli.mods.potionbundles.util.PotionBundleUtils;
 import at.minecraftschurli.mods.potionbundles.ServerConfig;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -42,7 +43,7 @@ public class PotionBundle extends AbstractPotionBundle {
             PotionBundleUtils.decrementUses(stack);
 
             if (player != null) {
-                player.getInventory().placeItemBackInInventory(new ItemStack(Items.GLASS_BOTTLE));
+                player.getInventory().placeItemBackInInventory(new ItemStack(Items.GLASS_BOTTLE), Prediction.PREDICTED);
             }
         }
 
