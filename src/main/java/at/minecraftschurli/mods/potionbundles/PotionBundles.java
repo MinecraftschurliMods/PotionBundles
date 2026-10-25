@@ -2,13 +2,12 @@ package at.minecraftschurli.mods.potionbundles;
 
 import at.minecraftschurli.mods.potionbundles.item.AbstractPotionBundle;
 import at.minecraftschurli.mods.potionbundles.util.PotionBundleString;
-import at.minecraftschurli.mods.potionbundles.util.PotionBundleUtils;
 import at.minecraftschurli.mods.potionbundles.util.SidedGetter;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -16,7 +15,6 @@ import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.PotionContents;
-import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -60,13 +58,16 @@ public final class PotionBundles {
         PotionBundleString stringLingering;
         HolderLookup.Provider holderLookupProvider = event.getParameters().holders();
         RecipeManager recipeManager = SidedGetter.getRecipeManager();
-        if (recipeManager != null) {
-            stringBasic = getStringFromRecipe(PotionBundlesItems.POTION_BUNDLE.get(), holderLookupProvider, recipeManager);
-            stringSplash = getStringFromRecipe(PotionBundlesItems.SPLASH_POTION_BUNDLE.get(), holderLookupProvider, recipeManager);
-            stringLingering = getStringFromRecipe(PotionBundlesItems.LINGERING_POTION_BUNDLE.get(), holderLookupProvider, recipeManager);
-        } else {
+        if (recipeManager == null) {
             LOGGER.info("No RecipeManager available, can't get correct string for potion bundles.");
             stringBasic = stringSplash = stringLingering = null;
+        } else if (!(holderLookupProvider instanceof RegistryAccess registryAccess)) {
+            LOGGER.info("No RegistryAccess available, can't get correct string for potion bundles.");
+            stringBasic = stringSplash = stringLingering = null;
+        } else {
+            stringBasic = getStringFromRecipe(PotionBundlesItems.POTION_BUNDLE.get(), registryAccess, recipeManager);
+            stringSplash = getStringFromRecipe(PotionBundlesItems.SPLASH_POTION_BUNDLE.get(), registryAccess, recipeManager);
+            stringLingering = getStringFromRecipe(PotionBundlesItems.LINGERING_POTION_BUNDLE.get(), registryAccess, recipeManager);
         }
         addBundlesForAllPotions(event, PotionBundlesItems.POTION_BUNDLE.get(), stringBasic);
         addBundlesForAllPotions(event, PotionBundlesItems.SPLASH_POTION_BUNDLE.get(), stringSplash);
@@ -83,14 +84,14 @@ public final class PotionBundles {
     }
 
     @Nullable
-    private static PotionBundleString getStringFromRecipe(AbstractPotionBundle bundle, HolderLookup.Provider holderLookupProvider, RecipeManager recipeManager) {
+    private static PotionBundleString getStringFromRecipe(AbstractPotionBundle bundle, RegistryAccess registryAccess, RecipeManager recipeManager) {
         for (RecipeHolder<?> holder : recipeManager.getRecipes()) {
             Recipe<?> recipe = holder.value();
             if (recipe.getSerializer() != POTION_BUNDLE_RECIPE_SERIALIZER.get()) continue;
             if (!(recipe instanceof PotionBundleRecipe potionBundleRecipe) || potionBundleRecipe.getBundleItem() != bundle) continue;
-            ContextMap context = new ContextMap.Builder()
-                .withParameter(SlotDisplayContext.REGISTRIES, holderLookupProvider)
-                .create(SlotDisplayContext.CONTEXT);
+            ContextMap context = ContextMap.builder()
+                .set(SlotDisplayContext.REGISTRIES, registryAccess)
+                .buildAndValidate(SlotDisplayContext.CONTEXT);
             for (ItemStack stack : potionBundleRecipe.getString().display().resolveForStacks(context)) {
                 if (!stack.isEmpty()) {
                     return PotionBundleString.fromItemStack(stack);
